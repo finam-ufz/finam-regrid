@@ -1,0 +1,26 @@
+image: python
+
+stages:
+  - test
+
+check:
+  stage: test
+  before_script:
+    - pip3 install black 'pylint<3' 'isort[colors]<6'
+  script:
+    - pip3 install --editable .
+    - black --check --diff --color .
+    - isort --check --diff --color .
+    - pylint src/finam_regrid
+
+test:
+  stage: test
+  script:
+    - pip3 install --editable .[test]
+    - python -m pytest --cov finam_regrid --cov-report term-missing --cov-report xml:cov.xml -v tests/
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: cov.xml
