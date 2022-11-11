@@ -73,32 +73,17 @@ def _to_esmf_grid(grid: fm.data.grid_tools.StructuredGrid, transformer):
     g.add_coords(staggerloc=ESMF.StaggerLoc.CORNER)
 
     axes = zip(grid.axes, grid.cell_axes)
-    for i, (ax, axc) in enumerate(axes):
-        coords_corner = np.asarray(
-            ax[
-                g.lower_bounds[ESMF.StaggerLoc.CORNER][i] : g.upper_bounds[
-                    ESMF.StaggerLoc.CORNER
-                ][i]
-            ]
-        )
-        coords = np.asarray(
-            axc[
-                g.lower_bounds[ESMF.StaggerLoc.CENTER][i] : g.upper_bounds[
-                    ESMF.StaggerLoc.CENTER
-                ][i]
-            ]
-        )
-
+    for i, (ax_corner, ax) in enumerate(axes):
         size = [1] * grid.dim
         size_corner = [1] * grid.dim
-        size[i] = coords.size
-        size_corner[i] = coords_corner.size
+        size[i] = ax.size
+        size_corner[i] = ax_corner.size
 
         grid_corner = g.get_coords(i, staggerloc=ESMF.StaggerLoc.CORNER)
         grid_center = g.get_coords(i, staggerloc=ESMF.StaggerLoc.CENTER)
 
-        grid_corner[...] = coords_corner.reshape(size_corner)
-        grid_center[...] = coords.reshape(size)
+        grid_corner[...] = ax_corner.reshape(size_corner)
+        grid_center[...] = ax.reshape(size)
 
     if transformer is not None:
         pass
