@@ -22,9 +22,9 @@ class Regrid(fm.adapters.regrid.ARegridding):
         self.out_field = None
 
     def _update_grid_specs(self):
-        self.transformer = create_transformer(self.input_grid, self.output_grid)
+        transformer = create_transformer(self.input_grid.crs, self.output_grid.crs)
 
-        _g1, self.in_field = to_esmf(self.input_grid)
+        _g1, self.in_field = to_esmf(self.input_grid, transformer)
         _g2, self.out_field = to_esmf(self.output_grid)
 
         self.regrid = ESMF.Regrid(

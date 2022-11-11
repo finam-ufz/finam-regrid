@@ -24,7 +24,7 @@ ESMF_MESH_LOC = {
 }
 
 
-def create_transformer(input_grid, output_grid):
+def create_transformer(in_crs, out_crs):
     """Creates a transformer for conversion between different CRS.
 
     Returns
@@ -32,8 +32,8 @@ def create_transformer(input_grid, output_grid):
     Transformer or None
         Return None if no transform is required.
     """
-    in_crs = None if input_grid.crs is None else crs.CRS(input_grid.crs)
-    out_crs = None if output_grid.crs is None else crs.CRS(output_grid.crs)
+    in_crs = None if in_crs is None else crs.CRS(in_crs)
+    out_crs = None if out_crs is None else crs.CRS(out_crs)
     transformer = (
         None
         if (in_crs is None and out_crs is None) or in_crs == out_crs
@@ -42,19 +42,25 @@ def create_transformer(input_grid, output_grid):
     return transformer
 
 
-def to_esmf(grid):
+def _transform_points(transformer, points):
+    if transformer is None:
+        return points
+    return np.asarray(list(transformer.itransform(points)))
+
+
+def to_esmf(grid, transformer=None):
     """Converts a FINAM grid specification to the corresponding ESMF type."""
     if isinstance(grid, fm.data.grid_tools.StructuredGrid):
-        return _to_esmf_grid(grid)
+        return _to_esmf_grid(grid, transformer)
     if isinstance(grid, fm.UnstructuredPoints):
-        return _to_esmf_points(grid)
+        return _to_esmf_points(grid, transformer)
     if isinstance(grid, fm.UnstructuredGrid):
-        return _to_esmf_mesh(grid)
+        return _to_esmf_mesh(grid, transformer)
 
     raise ValueError(f"Grid type '{grid.__class__.__name__}' not supported")
 
 
-def _to_esmf_grid(grid: fm.data.grid_tools.StructuredGrid):
+def _to_esmf_grid(grid: fm.data.grid_tools.StructuredGrid, transformer):
     dims = np.array([d - 1 for d in grid.dims], dtype=np.int32)
     loc = ESMF_STAGGER_LOC[grid.data_location]
 
@@ -94,13 +100,16 @@ def _to_esmf_grid(grid: fm.data.grid_tools.StructuredGrid):
         grid_corner[...] = coords_corner.reshape(size_corner)
         grid_center[...] = coords.reshape(size)
 
+    if transformer is not None:
+        pass
+
     field = ESMF.Field(g, name=grid.name, staggerloc=loc)
     field.data[:] = np.nan
 
     return g, field
 
 
-def _to_esmf_mesh(grid: fm.UnstructuredGrid):
+def _to_esmf_mesh(grid: fm.UnstructuredGrid, transformer):
     loc = ESMF_MESH_LOC[grid.data_location]
 
     mesh = ESMF.Mesh(
@@ -108,9 +117,11 @@ def _to_esmf_mesh(grid: fm.UnstructuredGrid):
     )
 
     node_ids = np.arange(grid.point_count)
+    points = _transform_points(transformer, grid.points)
+
     # Does for some reason create weird coordinates with `parametric_dim=2, spatial_dim=3`
     # Therefore removing the z coordinate
-    node_coords = np.array([p[:2] for p in grid.points]).flatten()
+    node_coords = np.array([p[:2] for p in points]).flatten()
     node_owner = np.zeros(grid.point_count)
 
     mesh.add_nodes(grid.point_count, node_ids, node_coords, node_owner)
@@ -134,11 +145,13 @@ def _to_esmf_mesh(grid: fm.UnstructuredGrid):
     return mesh, field
 
 
-def _to_esmf_points(grid: fm.UnstructuredPoints):
+def _to_esmf_points(grid: fm.UnstructuredPoints, transformer):
     locstream = ESMF.LocStream(grid.point_count, coord_sys=ESMF.CoordSys.CART)
 
+    points = _transform_points(transformer, grid.points)
+
     for i in range(grid.dim):
-        locstream[ESMF_DIM_NAMES[i]] = grid.points[:, i]
+        locstream[ESMF_DIM_NAMES[i]] = points[:, i]
 
     field = ESMF.Field(locstream, name=grid.name)
     field.data[:] = np.nan
