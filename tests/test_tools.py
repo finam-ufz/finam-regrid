@@ -8,6 +8,10 @@ from finam_regrid.tools import to_esmf
 
 
 class TestTools(unittest.TestCase):
+    def test_to_esmf_fail(self):
+        with self.assertRaises(ValueError):
+            g, f = to_esmf(fm.NoGrid())
+
     def test_to_esmf_grid(self):
         grid = fm.UniformGrid((20, 15))
 
