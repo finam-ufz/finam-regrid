@@ -25,6 +25,13 @@ ESMF_MESH_LOC = {
 
 
 def create_transformer(input_grid, output_grid):
+    """Creates a transformer for conversion between different CRS.
+
+    Returns
+    -------
+    Transformer or None
+        Return None if no transform is required.
+    """
     in_crs = None if input_grid.crs is None else crs.CRS(input_grid.crs)
     out_crs = None if output_grid.crs is None else crs.CRS(output_grid.crs)
     transformer = (

@@ -11,8 +11,9 @@ class Regrid(fm.adapters.regrid.ARegridding):
     Regrid data between two grid specifications using ESMF.
     """
 
-    def __init__(self, in_grid=None, out_grid=None):
+    def __init__(self, method=None, in_grid=None, out_grid=None):
         super().__init__(in_grid, out_grid)
+        self.method = method
         self.ids = None
         self.regrid = None
         self.out_ids = None
@@ -29,7 +30,7 @@ class Regrid(fm.adapters.regrid.ARegridding):
         self.regrid = ESMF.Regrid(
             self.in_field,
             self.out_field,
-            regrid_method=ESMF.RegridMethod.BILINEAR,
+            regrid_method=self.method,
             unmapped_action=ESMF.UnmappedAction.IGNORE,
         )
 
