@@ -93,7 +93,7 @@ class TestAdapter(unittest.TestCase):
 
         (
             source.outputs["Output"]
-            >> Regrid(method=RegridMethod.CONSERVE)
+            >> Regrid(regrid_method=RegridMethod.CONSERVE)
             >> sink.inputs["Input"]
         )
 

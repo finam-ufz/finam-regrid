@@ -11,12 +11,15 @@ class Regrid(fm.adapters.regrid.ARegridding):
     Regrid data between two grid specifications using ESMF.
     """
 
-    def __init__(self, method=None, in_grid=None, out_grid=None):
+    def __init__(self, in_grid=None, out_grid=None, **regrid_args):
         super().__init__(in_grid, out_grid)
-        self.method = method
+        self.regrid_args = regrid_args
         self.regrid = None
         self.in_field = None
         self.out_field = None
+
+        if "unmapped_action" not in self.regrid_args:
+            self.regrid_args["unmapped_action"] = ESMF.UnmappedAction.IGNORE
 
     def _update_grid_specs(self):
         transformer = create_transformer(self.input_grid.crs, self.output_grid.crs)
@@ -27,8 +30,7 @@ class Regrid(fm.adapters.regrid.ARegridding):
         self.regrid = ESMF.Regrid(
             self.in_field,
             self.out_field,
-            regrid_method=self.method,
-            unmapped_action=ESMF.UnmappedAction.IGNORE,
+            **self.regrid_args,
         )
 
     def _get_data(self, time, target):

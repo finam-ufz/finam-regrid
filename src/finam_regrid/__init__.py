@@ -1,5 +1,5 @@
 """ESMF/ESMPy regridding components for FINAM"""
-from ESMF.api.constants import RegridMethod
+from ESMF.api.constants import ExtrapMethod, RegridMethod, UnmappedAction
 
 from .adapter import Regrid
 
@@ -11,4 +11,4 @@ except ModuleNotFoundError:  # pragma: no cover
 
 
 __all__ = ["Regrid"]
-__all__ += ["RegridMethod"]
+__all__ += ["ExtrapMethod", "RegridMethod", "UnmappedAction"]
