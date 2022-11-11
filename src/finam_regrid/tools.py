@@ -36,26 +36,34 @@ def to_esmf(grid):
 
 
 def _to_esmf_grid(grid: fm.data.grid_tools.StructuredGrid):
-    dims = np.array(grid.dims, dtype=np.int32)
+    dims = np.array([d - 1 for d in grid.dims], dtype=np.int32)
     loc = ESMF_STAGGER_LOC[grid.data_location]
 
     g = ESMF.Grid(
         dims,
-        num_peri_dims=1,
-        staggerloc=[loc],
+        staggerloc=[],
         coord_sys=ESMF.CoordSys.CART,
     )
+    g.add_coords(staggerloc=ESMF.StaggerLoc.CENTER)
+    g.add_coords(staggerloc=ESMF.StaggerLoc.CORNER)
 
-    axes = grid.axes
-    for i, ax in enumerate(axes):
-        coords = np.asarray(ax[g.lower_bounds[loc][i] : g.upper_bounds[loc][i]])
-        size = [1] * len(axes)
+    axes = zip(grid.axes, grid.cell_axes)
+    for i, (ax, axc) in enumerate(axes):
+        coords_corner = np.asarray(ax[g.lower_bounds[ESMF.StaggerLoc.CORNER][i] : g.upper_bounds[ESMF.StaggerLoc.CORNER][i]])
+        coords = np.asarray(axc[g.lower_bounds[ESMF.StaggerLoc.CENTER][i] : g.upper_bounds[ESMF.StaggerLoc.CENTER][i]])
+
+        size = [1] * grid.dim
+        size_corner = [1] * grid.dim
         size[i] = coords.size
+        size_corner[i] = coords_corner.size
 
-        gridX = g.get_coords(i)
-        gridX[...] = coords.reshape(size)
+        grid_corner = g.get_coords(i, staggerloc=ESMF.StaggerLoc.CORNER)
+        grid_center = g.get_coords(i, staggerloc=ESMF.StaggerLoc.CENTER)
 
-    field = ESMF.Field(g, name=grid.name)
+        grid_corner[...] = coords_corner.reshape(size_corner)
+        grid_center[...] = coords.reshape(size)
+
+    field = ESMF.Field(g, name=grid.name, staggerloc=loc)
     field.data[:] = np.nan
 
     return g, field

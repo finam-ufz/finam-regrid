@@ -14,8 +14,17 @@ class TestTools(unittest.TestCase):
         g, f = to_esmf(grid)
 
         self.assertIsInstance(g, ESMF.Grid)
-        assert_allclose(g.get_coords(0)[:, 0], grid.axes[0])
-        assert_allclose(g.get_coords(1)[0, :], grid.axes[1])
+        assert_allclose(g.get_coords(0, staggerloc=ESMF.StaggerLoc.CORNER)[:, 0], grid.axes[0])
+        assert_allclose(g.get_coords(1, staggerloc=ESMF.StaggerLoc.CORNER)[0, :], grid.axes[1])
+
+    def test_to_esmf_grid_point(self):
+        grid = fm.UniformGrid((20, 15), data_location=fm.Location.POINTS)
+
+        g, f = to_esmf(grid)
+
+        self.assertIsInstance(g, ESMF.Grid)
+        assert_allclose(g.get_coords(0, staggerloc=ESMF.StaggerLoc.CORNER)[:, 0], grid.axes[0])
+        assert_allclose(g.get_coords(1, staggerloc=ESMF.StaggerLoc.CORNER)[0, :], grid.axes[1])
 
     def test_to_esmf_mesh(self):
         points = [
