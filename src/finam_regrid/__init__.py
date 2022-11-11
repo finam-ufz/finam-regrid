@@ -1,5 +1,6 @@
 """ESMF/ESMPy regridding components for FINAM"""
 
+from .adapter import Regrid
 from .tools import to_esmf
 
 try:
@@ -10,3 +11,4 @@ except ModuleNotFoundError:  # pragma: no cover
 
 
 __all__ = ["to_esmf"]
+__all__ = ["Regrid"]

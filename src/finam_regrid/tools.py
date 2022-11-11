@@ -4,6 +4,7 @@ from __future__ import annotations
 import ESMF
 import finam as fm
 import numpy as np
+from pyproj import Transformer, crs
 
 ESMF_CELLTYPES = {
     fm.CellType.TRI: ESMF.api.constants.MeshElemType.TRI,
@@ -21,6 +22,17 @@ ESMF_MESH_LOC = {
     fm.Location.CELLS: ESMF.MeshLoc.ELEMENT,
     fm.Location.POINTS: ESMF.MeshLoc.NODE,
 }
+
+
+def create_transformer(input_grid, output_grid):
+    in_crs = None if input_grid.crs is None else crs.CRS(input_grid.crs)
+    out_crs = None if output_grid.crs is None else crs.CRS(output_grid.crs)
+    transformer = (
+        None
+        if (in_crs is None and out_crs is None) or in_crs == out_crs
+        else Transformer.from_crs(in_crs, out_crs)
+    )
+    return transformer
 
 
 def to_esmf(grid):
@@ -49,8 +61,20 @@ def _to_esmf_grid(grid: fm.data.grid_tools.StructuredGrid):
 
     axes = zip(grid.axes, grid.cell_axes)
     for i, (ax, axc) in enumerate(axes):
-        coords_corner = np.asarray(ax[g.lower_bounds[ESMF.StaggerLoc.CORNER][i] : g.upper_bounds[ESMF.StaggerLoc.CORNER][i]])
-        coords = np.asarray(axc[g.lower_bounds[ESMF.StaggerLoc.CENTER][i] : g.upper_bounds[ESMF.StaggerLoc.CENTER][i]])
+        coords_corner = np.asarray(
+            ax[
+                g.lower_bounds[ESMF.StaggerLoc.CORNER][i] : g.upper_bounds[
+                    ESMF.StaggerLoc.CORNER
+                ][i]
+            ]
+        )
+        coords = np.asarray(
+            axc[
+                g.lower_bounds[ESMF.StaggerLoc.CENTER][i] : g.upper_bounds[
+                    ESMF.StaggerLoc.CENTER
+                ][i]
+            ]
+        )
 
         size = [1] * grid.dim
         size_corner = [1] * grid.dim
