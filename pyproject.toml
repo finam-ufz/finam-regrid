@@ -36,6 +36,7 @@ classifiers = [
 dependencies = [
     "numpy>=1.14.5",
     "xarray>=2022.03",
+    "pyproj>=3.4",
     "finam @ git+https://git.ufz.de/FINAM/finam.git",
 ]
 
