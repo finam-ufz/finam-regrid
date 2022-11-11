@@ -14,10 +14,7 @@ class Regrid(fm.adapters.regrid.ARegridding):
     def __init__(self, method=None, in_grid=None, out_grid=None):
         super().__init__(in_grid, out_grid)
         self.method = method
-        self.ids = None
         self.regrid = None
-        self.out_ids = None
-        self.fill_ids = None
         self.in_field = None
         self.out_field = None
 
