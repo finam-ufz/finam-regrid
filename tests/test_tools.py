@@ -52,3 +52,23 @@ class TestTools(unittest.TestCase):
         g, f = to_esmf(grid)
 
         self.assertIsInstance(g, ESMF.LocStream)
+
+    def test_regrid(self):
+        grid1 = fm.UniformGrid((21, 17))
+        grid2 = fm.UniformGrid((11, 9), spacing=(2.0, 2.0))
+
+        g1, f1 = to_esmf(grid1)
+        g2, f2 = to_esmf(grid2)
+
+        regrid = ESMF.Regrid(
+            f1,
+            f2,
+            regrid_method=ESMF.RegridMethod.BILINEAR,
+            unmapped_action=ESMF.UnmappedAction.IGNORE,
+        )
+
+        f1.data[:] = 2.0
+
+        regrid(f1, f2)
+
+        self.assertTrue(all(f == 2 for f in f2))

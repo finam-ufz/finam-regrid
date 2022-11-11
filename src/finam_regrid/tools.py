@@ -80,7 +80,14 @@ def _to_esmf_mesh(grid: fm.UnstructuredGrid):
     num_elems = elems.shape[0]
     elem_ids = np.arange(num_elems)
     elem_types = np.asarray([ESMF_CELLTYPES[e] for e in grid.cell_types])
-    mesh.add_elements(num_elems, elem_ids, elem_types, elems.flatten())
+
+    mesh.add_elements(
+        num_elems,
+        elem_ids,
+        elem_types,
+        elems.flatten(),
+        element_coords=grid.cell_centers,
+    )
 
     field = ESMF.Field(mesh, name=grid.name, meshloc=loc)
     field.data[:] = np.nan
