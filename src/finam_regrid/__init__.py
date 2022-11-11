@@ -1,4 +1,31 @@
-"""ESMF/ESMPy regridding components for FINAM"""
+"""ESMF/ESMPy regridding components for FINAM
+
+
+.. toctree::
+   :hidden:
+
+   self
+
+Adapter
+=======
+
+.. autosummary::
+   :toctree: generated
+   :caption: Adapter
+
+    Regrid
+
+Constants
+=========
+
+.. autosummary::
+   :toctree: generated
+   :caption: Constants
+
+    ExtrapMethod
+    RegridMethod
+    UnmappedAction
+"""
 from ESMF.api.constants import ExtrapMethod, RegridMethod, UnmappedAction
 
 from .adapter import Regrid
