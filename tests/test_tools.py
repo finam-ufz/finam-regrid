@@ -11,7 +11,7 @@ class TestTools(unittest.TestCase):
     def test_to_esmf_grid(self):
         grid = fm.UniformGrid((20, 15))
 
-        g = to_esmf(grid)
+        g, f = to_esmf(grid)
 
         self.assertIsInstance(g, ESMF.Grid)
         assert_allclose(g.get_coords(0)[:, 0], grid.axes[0])
@@ -36,7 +36,7 @@ class TestTools(unittest.TestCase):
             points, cells, types, data_location=fm.Location.CELLS
         )
 
-        g = to_esmf(grid)
+        g, f = to_esmf(grid)
 
         self.assertIsInstance(g, ESMF.Mesh)
 
@@ -49,6 +49,6 @@ class TestTools(unittest.TestCase):
         ]
         grid = fm.UnstructuredPoints(points)
 
-        g = to_esmf(grid)
+        g, f = to_esmf(grid)
 
         self.assertIsInstance(g, ESMF.LocStream)

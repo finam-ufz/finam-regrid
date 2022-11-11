@@ -12,6 +12,16 @@ ESMF_CELLTYPES = {
 
 ESMF_DIM_NAMES = ["ESMF:X", "ESMF:Y", "ESMF:Z"]
 
+ESMF_STAGGER_LOC = {
+    fm.Location.CELLS: ESMF.StaggerLoc.CENTER,
+    fm.Location.POINTS: ESMF.StaggerLoc.CORNER,
+}
+
+ESMF_MESH_LOC = {
+    fm.Location.CELLS: ESMF.MeshLoc.ELEMENT,
+    fm.Location.POINTS: ESMF.MeshLoc.NODE,
+}
+
 
 def to_esmf(grid):
     """Converts a FINAM grid specification to the corresponding ESMF type."""
@@ -27,11 +37,8 @@ def to_esmf(grid):
 
 def _to_esmf_grid(grid: fm.data.grid_tools.StructuredGrid):
     dims = np.array(grid.dims, dtype=np.int32)
-    loc = (
-        ESMF.StaggerLoc.CENTER
-        if grid.data_location == fm.Location.CELLS
-        else ESMF.StaggerLoc.CORNER
-    )
+    loc = ESMF_STAGGER_LOC[grid.data_location]
+
     g = ESMF.Grid(
         dims,
         num_peri_dims=1,
@@ -48,10 +55,15 @@ def _to_esmf_grid(grid: fm.data.grid_tools.StructuredGrid):
         gridX = g.get_coords(i)
         gridX[...] = coords.reshape(size)
 
-    return g
+    field = ESMF.Field(g, name=grid.name)
+    field.data[:] = np.nan
+
+    return g, field
 
 
 def _to_esmf_mesh(grid: fm.UnstructuredGrid):
+    loc = ESMF_MESH_LOC[grid.data_location]
+
     mesh = ESMF.Mesh(
         parametric_dim=grid.mesh_dim, spatial_dim=grid.dim, coord_sys=ESMF.CoordSys.CART
     )
@@ -70,7 +82,10 @@ def _to_esmf_mesh(grid: fm.UnstructuredGrid):
     elem_types = np.asarray([ESMF_CELLTYPES[e] for e in grid.cell_types])
     mesh.add_elements(num_elems, elem_ids, elem_types, elems.flatten())
 
-    return mesh
+    field = ESMF.Field(mesh, name=grid.name, meshloc=loc)
+    field.data[:] = np.nan
+
+    return mesh, field
 
 
 def _to_esmf_points(grid: fm.UnstructuredPoints):
@@ -79,4 +94,7 @@ def _to_esmf_points(grid: fm.UnstructuredPoints):
     for i in range(grid.dim):
         locstream[ESMF_DIM_NAMES[i]] = grid.points[:, i]
 
-    return locstream
+    field = ESMF.Field(locstream, name=grid.name)
+    field.data[:] = np.nan
+
+    return locstream, field
