@@ -72,21 +72,15 @@ def _to_esmf_grid(grid: fm.data.grid_tools.StructuredGrid, transformer):
     g.add_coords(staggerloc=ESMF.StaggerLoc.CENTER)
     g.add_coords(staggerloc=ESMF.StaggerLoc.CORNER)
 
-    axes = zip(grid.axes, grid.cell_axes)
-    for i, (ax_corner, ax) in enumerate(axes):
-        size = [1] * grid.dim
-        size_corner = [1] * grid.dim
-        size[i] = ax.size
-        size_corner[i] = ax_corner.size
+    points = _transform_points(transformer, grid.points)
+    cells = _transform_points(transformer, grid.cell_centers)
 
+    for i in range(len(grid.axes)):
         grid_corner = g.get_coords(i, staggerloc=ESMF.StaggerLoc.CORNER)
         grid_center = g.get_coords(i, staggerloc=ESMF.StaggerLoc.CENTER)
 
-        grid_corner[...] = ax_corner.reshape(size_corner)
-        grid_center[...] = ax.reshape(size)
-
-    if transformer is not None:
-        pass
+        grid_corner[...] = points[:, i].reshape(grid.dims, order=grid.order)
+        grid_center[...] = cells[:, i].reshape(dims, order=grid.order)
 
     field = ESMF.Field(g, name=grid.name, staggerloc=loc)
     field.data[:] = np.nan
