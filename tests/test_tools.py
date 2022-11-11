@@ -4,18 +4,39 @@ import ESMF
 import finam as fm
 from numpy.testing import assert_allclose
 
-from finam_regrid import to_esmf
+from finam_regrid.tools import to_esmf
 
 
 class TestTools(unittest.TestCase):
+    def test_to_esmf_fail(self):
+        with self.assertRaises(ValueError):
+            g, f = to_esmf(fm.NoGrid())
+
     def test_to_esmf_grid(self):
         grid = fm.UniformGrid((20, 15))
 
         g, f = to_esmf(grid)
 
         self.assertIsInstance(g, ESMF.Grid)
-        assert_allclose(g.get_coords(0)[:, 0], grid.axes[0])
-        assert_allclose(g.get_coords(1)[0, :], grid.axes[1])
+        assert_allclose(
+            g.get_coords(0, staggerloc=ESMF.StaggerLoc.CORNER)[:, 0], grid.axes[0]
+        )
+        assert_allclose(
+            g.get_coords(1, staggerloc=ESMF.StaggerLoc.CORNER)[0, :], grid.axes[1]
+        )
+
+    def test_to_esmf_grid_point(self):
+        grid = fm.UniformGrid((20, 15), data_location=fm.Location.POINTS)
+
+        g, f = to_esmf(grid)
+
+        self.assertIsInstance(g, ESMF.Grid)
+        assert_allclose(
+            g.get_coords(0, staggerloc=ESMF.StaggerLoc.CORNER)[:, 0], grid.axes[0]
+        )
+        assert_allclose(
+            g.get_coords(1, staggerloc=ESMF.StaggerLoc.CORNER)[0, :], grid.axes[1]
+        )
 
     def test_to_esmf_mesh(self):
         points = [
