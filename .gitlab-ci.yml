@@ -1,4 +1,4 @@
-image: python
+image: continuumio/miniconda3:latest
 
 stages:
   - test
@@ -6,17 +6,22 @@ stages:
 check:
   stage: test
   before_script:
+    - conda create -n esmf -c conda-forge esmpy
+    - source activate esmf
     - pip3 install black 'pylint<3' 'isort[colors]<6'
   script:
-    - pip3 install --editable .
+    - pip3 install .
     - black --check --diff --color .
     - isort --check --diff --color .
     - pylint src/finam_regrid
 
 test:
   stage: test
+  before_script:
+    - conda create -n esmf -c conda-forge esmpy
+    - source activate esmf
   script:
-    - pip3 install --editable .[test]
+    - pip3 install .[test]
     - python -m pytest --cov finam_regrid --cov-report term-missing --cov-report xml:cov.xml -v tests/
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:

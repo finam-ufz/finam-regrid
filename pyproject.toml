@@ -1,10 +1,64 @@
 [build-system]
 requires = [
-    "setuptools>=42",
-    "wheel",
-    "setuptools_scm[toml]>=3.5",
+    "setuptools>=64",
+    "setuptools_scm[toml]>=6.4",
 ]
 build-backend = "setuptools.build_meta"
+
+[project]
+requires-python = ">=3.8"
+name = "finam_regrid"
+description = "FINAM ESMPy regridding adapters."
+authors = [{name = "FINAM Developers", email = "finam@ufz.de"}]
+readme = "README.md"
+license = {text = "LGPLv3"}
+dynamic = ["version"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+    "Natural Language :: English",
+    "Operating System :: Unix",
+    "Operating System :: Microsoft",
+    "Operating System :: MacOS",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "numpy>=1.14.5",
+    "xarray>=2022.03",
+    "pyproj>=3.4",
+    "finam @ git+https://git.ufz.de/FINAM/finam.git",
+]
+
+[project.urls]
+Homepage = "https://FINAM-regrid.pages.ufz.de/"
+Documentation = "https://FINAM-regrid.pages.ufz.de/"
+Source = "https://git.ufz.de/FINAM/finam-regrid"
+Tracker = "https://git.ufz.de/FINAM/finam-regrid/-/issues"
+Changelog = "https://git.ufz.de/FINAM/finam-regrid/-/blob/main/finam-regrid/CHANGELOG.md"
+
+[project.optional-dependencies]
+doc = [
+    "sphinx>=5",
+    "pydata-sphinx-theme==0.11",
+    "numpydoc>=1.1",
+    "sphinx-design>=0.3",
+    "docutils>=0.18", # mdinclude with myst
+]
+test = ["pytest-cov>=3"]
+
+[tool.setuptools]
+license-files = ["LICENSE"]
 
 [tool.setuptools_scm]
 write_to = "src/finam_regrid/_version.py"
@@ -16,6 +70,7 @@ fallback_version = "0.0.0.dev0"
 exclude = "_version.py"
 target-version = [
     "py38",
+    "py39"
 ]
 
 [tool.isort]
