@@ -53,6 +53,7 @@ doc = [
     "pydata-sphinx-theme==0.11",
     "numpydoc>=1.1",
     "sphinx-design>=0.3",
+    "esmpy>=8.0",
     "docutils>=0.18", # mdinclude with myst
 ]
 test = ["pytest-cov>=3"]

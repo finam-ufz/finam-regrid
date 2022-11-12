@@ -1,4 +1,32 @@
-"""ESMF/ESMPy regridding components for FINAM"""
+"""
+`ESMPy <https://earthsystemmodeling.org/esmpy/>`_
+regridding adapter for the `FINAM <https://finam.pages.ufz.de/>`_ model coupling framework.
+
+.. toctree::
+   :hidden:
+
+   self
+
+Adapter
+=======
+
+.. autosummary::
+   :toctree: generated
+   :caption: Adapter
+
+    Regrid
+
+Constants
+=========
+
+.. autosummary::
+   :toctree: generated
+   :caption: Constants
+
+    ExtrapMethod
+    RegridMethod
+    UnmappedAction
+"""
 from ESMF.api.constants import ExtrapMethod, RegridMethod, UnmappedAction
 
 from .adapter import Regrid

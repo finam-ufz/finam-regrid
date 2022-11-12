@@ -8,7 +8,59 @@ from .tools import create_transformer, to_esmf
 
 class Regrid(fm.adapters.regrid.ARegridding):
     """
-    Regrid data between two grid specifications using ESMF.
+    FINAM adapter for regridding using `ESMPy <https://earthsystemmodeling.org/esmpy/>`_.
+
+    Supports all of ESMPy's  :class:`regridding methods <.RegridMethod>`.
+    For parameters passed as ``**regrid_args``, see the ESMPy class
+    `Regrid <https://earthsystemmodeling.org/esmpy_doc/release/latest/html/regrid.html>`_
+
+    Examples
+    --------
+
+    Simple usage with defaults and grid specifications from connected components:
+
+    .. testcode:: constructor
+
+        import finam_regrid as fmr
+
+        adapter = fmr.Regrid()
+
+    Using a specific regridding method:
+
+    .. testcode:: constructor
+
+        adapter = fmr.Regrid(
+            regrid_method=fmr.RegridMethod.CONSERVE_2ND,
+        )
+
+    Using a specific regridding method and extrapolation:
+
+    .. testcode:: constructor
+
+        adapter = fmr.Regrid(
+            regrid_method=fmr.RegridMethod.CONSERVE_2ND,
+            extrap_method=fmr.ExtrapMethod.NEAREST_IDAVG,
+        )
+
+    Parameters
+    ----------
+
+    in_grid : finam.Grid, optional
+        Input grid specification. Will be retrieved from upstream component if not specified.
+    out_grid : finam.Grid, optional
+        Output grid specification. Will be retrieved from downstream component if not specified.
+    **regrid_args : Any
+        Keyword argument passed to the ESMPy class
+        `Regrid <https://earthsystemmodeling.org/esmpy_doc/release/latest/html/regrid.html>`_.
+
+        **Important keyword arguments are:**
+
+    regrid_method : RegridMethod
+        Regridding method. See :class:`.RegridMethod`. Defaults to :attr:`.RegridMethod.BILINEAR`.
+    extrap_method : ExtrapMethod
+        Extrapolation method. See :class:`.ExtrapMethod`. Defaults to ``None``.
+    unmapped_action : UnmappedAction
+        Action on unmapped cells. See :class:`.UnmappedAction`. Defaults to :attr:`.UnmappedAction.IGNORE`.
     """
 
     def __init__(self, in_grid=None, out_grid=None, **regrid_args):
