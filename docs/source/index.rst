@@ -44,7 +44,7 @@ in the GitLab repository for fully functional usage examples.
 API References
 --------------
 
-Information about the API of FINAM-NetCDF.
+Information about the API of FINAM-regrid.
 
 .. toctree::
     :hidden:

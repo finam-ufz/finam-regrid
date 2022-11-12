@@ -102,6 +102,6 @@ html_theme_options = {
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     "Python": ("https://docs.python.org/", None),
-    "NumPy": ("http://docs.scipy.org/doc/numpy/", None),
+    "NumPy": ("https://docs.scipy.org/doc/numpy/", None),
     "finam": ("https://finam.pages.ufz.de/finam/", None),
 }
