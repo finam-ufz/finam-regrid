@@ -29,12 +29,16 @@ Now, install :mod:`finam_regrid` and other required packages using `pip <https:/
 
     $ pip install git+https://git.ufz.de/FINAM/finam-regrid.git
 
-For available components, see the :doc:`api/index`.
-
 Usage
 -----
 
-See the `example scripts <https://git.ufz.de/FINAM/finam-regrid/-/tree/main/examples>`_
+The main class of this package is the adapter :class:`.Regrid`.
+For other package members, see the :doc:`api/index`.
+
+FINAM-regrid supports all of ESMPy's  :class:`regridding methods <.RegridMethod>`.
+For more options, see the ESMPy class `Regrid <https://earthsystemmodeling.org/esmpy_doc/release/latest/html/regrid.html>`_
+
+See also the `example scripts <https://git.ufz.de/FINAM/finam-regrid/-/tree/main/examples>`_
 in the GitLab repository for fully functional usage examples.
 
 API References

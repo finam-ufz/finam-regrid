@@ -1,5 +1,6 @@
 """
-ESMF/ESMPy regridding components for FINAM
+`ESMPy <https://earthsystemmodeling.org/esmpy/>`_
+regridding adapter for the `FINAM <https://finam.pages.ufz.de/>`_ model coupling framework.
 
 .. toctree::
    :hidden:
