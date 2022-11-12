@@ -1,5 +1,5 @@
-"""ESMF/ESMPy regridding components for FINAM
-
+"""
+ESMF/ESMPy regridding components for FINAM
 
 .. toctree::
    :hidden:
