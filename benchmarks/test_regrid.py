@@ -1,4 +1,5 @@
 import datetime as dt
+import gc
 import unittest
 
 import finam as fm
@@ -13,6 +14,11 @@ class TestRegrid(unittest.TestCase):
         self.benchmark = benchmark
 
     def setup_adapter(self, grid1, grid2, adapter):
+        self.adapter = None
+        self.source = None
+        self.data = None
+        gc.collect()
+
         time = dt.datetime(2000, 1, 1)
         self.data = fm.data.full(1.0, "test", fm.Info(time=time, grid=grid1), time=time)
 
@@ -38,9 +44,11 @@ class TestRegrid(unittest.TestCase):
         self.setup_adapter(
             grid1, grid2, fmr.Regrid(regrid_method=fmr.RegridMethod.NEAREST_STOD)
         )
-        _result = self.benchmark(
+        result = self.benchmark(
             self.adapter.get_data, time=dt.datetime(2000, 1, 1), target=None
         )
+        del result
+        gc.collect()
 
     @pytest.mark.benchmark(group="adapters-regrid")
     def test_regrid_nearest_02_512x256(self):
@@ -50,9 +58,11 @@ class TestRegrid(unittest.TestCase):
         self.setup_adapter(
             grid1, grid2, fmr.Regrid(regrid_method=fmr.RegridMethod.NEAREST_STOD)
         )
-        _result = self.benchmark(
+        result = self.benchmark(
             self.adapter.get_data, time=dt.datetime(2000, 1, 1), target=None
         )
+        del result
+        gc.collect()
 
     @pytest.mark.benchmark(group="adapters-regrid")
     def test_regrid_nearest_03_1024x512(self):
@@ -62,9 +72,11 @@ class TestRegrid(unittest.TestCase):
         self.setup_adapter(
             grid1, grid2, fmr.Regrid(regrid_method=fmr.RegridMethod.NEAREST_STOD)
         )
-        _result = self.benchmark(
+        result = self.benchmark(
             self.adapter.get_data, time=dt.datetime(2000, 1, 1), target=None
         )
+        del result
+        gc.collect()
 
     @pytest.mark.benchmark(group="adapters-regrid")
     def test_regrid_linear_01_32x16(self):
@@ -74,9 +86,11 @@ class TestRegrid(unittest.TestCase):
         self.setup_adapter(
             grid1, grid2, fmr.Regrid(regrid_method=fmr.RegridMethod.BILINEAR)
         )
-        _result = self.benchmark(
+        result = self.benchmark(
             self.adapter.get_data, time=dt.datetime(2000, 1, 1), target=None
         )
+        del result
+        gc.collect()
 
     @pytest.mark.benchmark(group="adapters-regrid")
     def test_regrid_linear_02_512x256(self):
@@ -86,9 +100,11 @@ class TestRegrid(unittest.TestCase):
         self.setup_adapter(
             grid1, grid2, fmr.Regrid(regrid_method=fmr.RegridMethod.BILINEAR)
         )
-        _result = self.benchmark(
+        result = self.benchmark(
             self.adapter.get_data, time=dt.datetime(2000, 1, 1), target=None
         )
+        del result
+        gc.collect()
 
     @pytest.mark.benchmark(group="adapters-regrid")
     def test_regrid_linear_03_1024x512(self):
@@ -98,9 +114,11 @@ class TestRegrid(unittest.TestCase):
         self.setup_adapter(
             grid1, grid2, fmr.Regrid(regrid_method=fmr.RegridMethod.BILINEAR)
         )
-        _result = self.benchmark(
+        result = self.benchmark(
             self.adapter.get_data, time=dt.datetime(2000, 1, 1), target=None
         )
+        del result
+        gc.collect()
 
     @pytest.mark.benchmark(group="adapters-regrid")
     def test_regrid_conserve_01_32x16(self):
@@ -110,9 +128,11 @@ class TestRegrid(unittest.TestCase):
         self.setup_adapter(
             grid1, grid2, fmr.Regrid(regrid_method=fmr.RegridMethod.CONSERVE)
         )
-        _result = self.benchmark(
+        result = self.benchmark(
             self.adapter.get_data, time=dt.datetime(2000, 1, 1), target=None
         )
+        del result
+        gc.collect()
 
     @pytest.mark.benchmark(group="adapters-regrid")
     def test_regrid_conserve_02_512x256(self):
@@ -122,9 +142,11 @@ class TestRegrid(unittest.TestCase):
         self.setup_adapter(
             grid1, grid2, fmr.Regrid(regrid_method=fmr.RegridMethod.CONSERVE)
         )
-        _result = self.benchmark(
+        result = self.benchmark(
             self.adapter.get_data, time=dt.datetime(2000, 1, 1), target=None
         )
+        del result
+        gc.collect()
 
     @pytest.mark.benchmark(group="adapters-regrid")
     def test_regrid_conserve_03_1024x512(self):
@@ -134,9 +156,11 @@ class TestRegrid(unittest.TestCase):
         self.setup_adapter(
             grid1, grid2, fmr.Regrid(regrid_method=fmr.RegridMethod.CONSERVE)
         )
-        _result = self.benchmark(
+        result = self.benchmark(
             self.adapter.get_data, time=dt.datetime(2000, 1, 1), target=None
         )
+        del result
+        gc.collect()
 
     @pytest.mark.benchmark(group="adapters-regrid")
     def test_regrid_conserve_2nd_01_32x16(self):
@@ -146,9 +170,11 @@ class TestRegrid(unittest.TestCase):
         self.setup_adapter(
             grid1, grid2, fmr.Regrid(regrid_method=fmr.RegridMethod.CONSERVE_2ND)
         )
-        _result = self.benchmark(
+        result = self.benchmark(
             self.adapter.get_data, time=dt.datetime(2000, 1, 1), target=None
         )
+        del result
+        gc.collect()
 
     @pytest.mark.benchmark(group="adapters-regrid")
     def test_regrid_conserve_2nd_02_512x256(self):
@@ -158,9 +184,11 @@ class TestRegrid(unittest.TestCase):
         self.setup_adapter(
             grid1, grid2, fmr.Regrid(regrid_method=fmr.RegridMethod.CONSERVE_2ND)
         )
-        _result = self.benchmark(
+        result = self.benchmark(
             self.adapter.get_data, time=dt.datetime(2000, 1, 1), target=None
         )
+        del result
+        gc.collect()
 
     @pytest.mark.benchmark(group="adapters-regrid")
     def test_regrid_conserve_2nd_03_1024x512(self):
@@ -170,6 +198,8 @@ class TestRegrid(unittest.TestCase):
         self.setup_adapter(
             grid1, grid2, fmr.Regrid(regrid_method=fmr.RegridMethod.CONSERVE_2ND)
         )
-        _result = self.benchmark(
+        result = self.benchmark(
             self.adapter.get_data, time=dt.datetime(2000, 1, 1), target=None
         )
+        del result
+        gc.collect()
