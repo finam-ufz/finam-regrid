@@ -56,7 +56,10 @@ doc = [
     "esmpy>=8.0",
     "docutils>=0.18", # mdinclude with myst
 ]
-test = ["pytest-cov>=3"]
+test = [
+    "pytest-cov>=3",
+    "pytest-benchmark[histogram]>=4.0",
+]
 
 [tool.setuptools]
 license-files = ["LICENSE"]

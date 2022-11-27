@@ -44,6 +44,18 @@ doctest:
     - sphinx-build -b dummy docs/source docs/build
     - sphinx-build -b doctest docs/source docs/build
 
+benchmark:
+  stage: test
+  before_script:
+    - conda create -n esmf -c conda-forge esmpy
+    - source activate esmf
+  script:
+    - pip3 install --editable .[test]
+    - python -m pytest -v benchmarks/ --benchmark-histogram bench/bench  --benchmark-sort name
+  artifacts:
+    paths:
+      - bench
+
 documentation:
   stage: build
   before_script:
