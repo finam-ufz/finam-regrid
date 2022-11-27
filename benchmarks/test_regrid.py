@@ -55,9 +55,9 @@ class TestRegrid(unittest.TestCase):
         )
 
     @pytest.mark.benchmark(group="adapters-regrid")
-    def test_regrid_nearest_03_2048x1024(self):
-        grid1 = fm.UniformGrid((2048, 1024))
-        grid2 = fm.UniformGrid((2048, 1024), origin=(0.25, 0.25))
+    def test_regrid_nearest_03_1024x512(self):
+        grid1 = fm.UniformGrid((1024, 512))
+        grid2 = fm.UniformGrid((1024, 512), origin=(0.25, 0.25))
 
         self.setup_adapter(
             grid1, grid2, fmr.Regrid(regrid_method=fmr.RegridMethod.NEAREST_STOD)
@@ -91,9 +91,9 @@ class TestRegrid(unittest.TestCase):
         )
 
     @pytest.mark.benchmark(group="adapters-regrid")
-    def test_regrid_linear_03_2048x1024(self):
-        grid1 = fm.UniformGrid((2048, 1024))
-        grid2 = fm.UniformGrid((2048, 1024), origin=(0.25, 0.25))
+    def test_regrid_linear_03_1024x512(self):
+        grid1 = fm.UniformGrid((1024, 512))
+        grid2 = fm.UniformGrid((1024, 512), origin=(0.25, 0.25))
 
         self.setup_adapter(
             grid1, grid2, fmr.Regrid(regrid_method=fmr.RegridMethod.BILINEAR)
@@ -127,9 +127,9 @@ class TestRegrid(unittest.TestCase):
         )
 
     @pytest.mark.benchmark(group="adapters-regrid")
-    def test_regrid_conserve_03_2048x1024(self):
-        grid1 = fm.UniformGrid((2048, 1024))
-        grid2 = fm.UniformGrid((2048, 1024), origin=(0.25, 0.25))
+    def test_regrid_conserve_03_1024x512(self):
+        grid1 = fm.UniformGrid((1024, 512))
+        grid2 = fm.UniformGrid((1024, 512), origin=(0.25, 0.25))
 
         self.setup_adapter(
             grid1, grid2, fmr.Regrid(regrid_method=fmr.RegridMethod.CONSERVE)
@@ -163,9 +163,9 @@ class TestRegrid(unittest.TestCase):
         )
 
     @pytest.mark.benchmark(group="adapters-regrid")
-    def test_regrid_conserve_2nd_03_2048x1024(self):
-        grid1 = fm.UniformGrid((2048, 1024))
-        grid2 = fm.UniformGrid((2048, 1024), origin=(0.25, 0.25))
+    def test_regrid_conserve_2nd_03_1024x512(self):
+        grid1 = fm.UniformGrid((1024, 512))
+        grid2 = fm.UniformGrid((1024, 512), origin=(0.25, 0.25))
 
         self.setup_adapter(
             grid1, grid2, fmr.Regrid(regrid_method=fmr.RegridMethod.CONSERVE_2ND)
