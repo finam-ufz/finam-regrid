@@ -48,7 +48,7 @@ class TestAdapter(unittest.TestCase):
 
         composition.connect()
 
-        composition.run(t_max=datetime(2000, 1, 5))
+        composition.run(end_time=datetime(2000, 1, 5))
 
         result = sink.data["Input"]
         self.assertEqual(result[0, 0, 0], 1.0 * fm.UNITS.meter)
@@ -99,7 +99,7 @@ class TestAdapter(unittest.TestCase):
 
         composition.connect()
 
-        composition.run(t_max=datetime(2000, 1, 5))
+        composition.run(end_time=datetime(2000, 1, 5))
 
         result = sink.data["Input"]
         self.assertEqual(result[0, 0, 0], 1.0 * fm.UNITS.meter)
@@ -143,7 +143,7 @@ class TestAdapter(unittest.TestCase):
 
         (source.outputs["Output"] >> Regrid() >> sink.inputs["Input"])
 
-        composition.run(t_max=datetime(2000, 1, 2))
+        composition.run(end_time=datetime(2000, 1, 2))
 
         self.assertEqual(sink.inputs["Input"].info.grid, out_spec)
         self.assertAlmostEqual(fm.data.get_magnitude(sink.data["Input"])[0, 0, 0], 1.0)
