@@ -20,7 +20,7 @@ class TestRegrid(unittest.TestCase):
         gc.collect()
 
         time = dt.datetime(2000, 1, 1)
-        self.data = fm.data.full(1.0, "test", fm.Info(time=time, grid=grid1), time=time)
+        self.data = fm.data.full(1.0, "test", fm.Info(time=time, grid=grid1))
 
         self.source = fm.modules.CallbackGenerator(
             callbacks={"Step": (lambda t: self.data, fm.Info(None, grid=grid1))},
@@ -32,8 +32,8 @@ class TestRegrid(unittest.TestCase):
         self.source.outputs["Step"] >> self.adapter
 
         self.adapter.get_info(fm.Info(None, grid=grid2))
-        self.source.connect()
-        self.source.connect()
+        self.source.connect(time)
+        self.source.connect(time)
         self.source.validate()
 
     @pytest.mark.benchmark(group="adapters-regrid")

@@ -27,7 +27,7 @@ class TestAdapter(unittest.TestCase):
         source = fm.modules.CallbackGenerator(
             callbacks={
                 "Output": (
-                    lambda t: in_data,
+                    lambda t: in_data.copy(),
                     in_info,
                 )
             },
@@ -36,7 +36,7 @@ class TestAdapter(unittest.TestCase):
         )
 
         sink = fm.modules.DebugConsumer(
-            {"Input": fm.Info(None, grid=out_spec)},
+            {"Input": fm.Info(None, grid=out_spec, units=None)},
             start=datetime(2000, 1, 1),
             step=timedelta(days=1),
         )
@@ -74,7 +74,7 @@ class TestAdapter(unittest.TestCase):
         source = fm.modules.CallbackGenerator(
             callbacks={
                 "Output": (
-                    lambda t: in_data,
+                    lambda t: in_data.copy(),
                     in_info,
                 )
             },
@@ -83,7 +83,7 @@ class TestAdapter(unittest.TestCase):
         )
 
         sink = fm.modules.DebugConsumer(
-            {"Input": fm.Info(None, grid=out_spec)},
+            {"Input": fm.Info(None, grid=out_spec, units=None)},
             start=datetime(2000, 1, 1),
             step=timedelta(days=1),
         )
@@ -127,13 +127,13 @@ class TestAdapter(unittest.TestCase):
         in_data.data[0, 0] = 1.0
 
         source = fm.modules.CallbackGenerator(
-            callbacks={"Output": (lambda t: in_data, in_info)},
+            callbacks={"Output": (lambda t: in_data.copy(), in_info)},
             start=datetime(2000, 1, 1),
             step=timedelta(days=1),
         )
 
         sink = fm.modules.DebugConsumer(
-            {"Input": fm.Info(None, grid=out_spec)},
+            {"Input": fm.Info(None, grid=out_spec, units=None)},
             start=datetime(2000, 1, 1),
             step=timedelta(days=1),
         )
