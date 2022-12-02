@@ -67,6 +67,8 @@ class Regrid(fm.adapters.regrid.ARegridding):
         super().__init__(in_grid, out_grid)
         self.regrid_args = regrid_args
         self.regrid = None
+        self.in_grid = None
+        self.out_grid = None
         self.in_field = None
         self.out_field = None
 
@@ -76,8 +78,13 @@ class Regrid(fm.adapters.regrid.ARegridding):
     def _update_grid_specs(self):
         transformer = create_transformer(self.input_grid.crs, self.output_grid.crs)
 
-        _g1, self.in_field = to_esmf(self.input_grid, transformer)
-        _g2, self.out_field = to_esmf(self.output_grid)
+        self.in_grid, self.in_field = to_esmf(self.input_grid, transformer)
+        self.out_grid, self.out_field = to_esmf(self.output_grid)
+
+        if isinstance(self.in_grid, ESMF.Mesh):
+            self.in_grid.free_memory()
+        if isinstance(self.out_grid, ESMF.Mesh):
+            self.out_grid.free_memory()
 
         self.regrid = ESMF.Regrid(
             self.in_field,
@@ -94,3 +101,10 @@ class Regrid(fm.adapters.regrid.ARegridding):
         self.regrid(self.in_field, self.out_field)
 
         return self.out_field.data * fm.data.get_units(in_data)
+
+    def _finalize(self):
+        self.regrid.destroy()
+        self.in_field.destroy()
+        self.out_field.destroy()
+        self.in_grid.destroy()
+        self.out_grid.destroy()
