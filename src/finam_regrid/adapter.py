@@ -108,3 +108,9 @@ class Regrid(fm.adapters.regrid.ARegridding):
         self.out_field.destroy()
         self.in_grid.destroy()
         self.out_grid.destroy()
+
+        self.regrid = None
+        self.in_field = None
+        self.out_field = None
+        self.in_grid = None
+        self.out_grid = None
