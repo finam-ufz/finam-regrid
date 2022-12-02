@@ -8,70 +8,21 @@ from finam_regrid import Regrid, RegridMethod
 
 
 class TestAdapter(unittest.TestCase):
-    def test_adapter(self):
+    def setup_run(self, in_grid, out_grid, regrid_method):
         time = datetime(2000, 1, 1)
-        in_info = fm.Info(
-            time=time,
-            grid=fm.UniformGrid(
-                dims=(5, 10),
-                spacing=(2.0, 2.0, 2.0),
-                data_location=fm.Location.POINTS,
-            ),
-            units="m",
-        )
-        out_spec = fm.UniformGrid(dims=(9, 19), data_location=fm.Location.POINTS)
-
-        in_data = np.zeros(shape=in_info.grid.data_shape, order=in_info.grid.order)
-        in_data.data[0, 0] = 1.0
-
-        source = fm.modules.CallbackGenerator(
-            callbacks={
-                "Output": (
-                    lambda t: in_data.copy(),
-                    in_info,
-                )
-            },
-            start=datetime(2000, 1, 1),
-            step=timedelta(days=1),
-        )
-
-        sink = fm.modules.DebugConsumer(
-            {"Input": fm.Info(None, grid=out_spec, units=None)},
-            start=datetime(2000, 1, 1),
-            step=timedelta(days=1),
-        )
-
-        composition = fm.Composition([source, sink])
-        composition.initialize()
-
-        (source.outputs["Output"] >> Regrid() >> sink.inputs["Input"])
-
-        composition.connect()
-
-        composition.run(end_time=datetime(2000, 1, 5))
-
-        result = sink.data["Input"]
-        self.assertEqual(result[0, 0, 0], 1.0 * fm.UNITS.meter)
-        self.assertEqual(result[0, 0, 1], 0.5 * fm.UNITS.meter)
-        self.assertEqual(result[0, 1, 0], 0.5 * fm.UNITS.meter)
-        self.assertEqual(result[0, 1, 1], 0.25 * fm.UNITS.meter)
-
-    def test_adapter_mesh(self):
-        time = datetime(2000, 1, 1)
-
-        in_grid = _create_mesh()
-
         in_info = fm.Info(
             time=time,
             grid=in_grid,
             units="m",
         )
-        out_spec = _create_mesh()
 
-        in_data = fm.data.full(0.0, "data", fm.Info(time=None, grid=in_grid))
-        in_data.data[0] = 1.0
+        in_data = np.zeros(shape=in_info.grid.data_shape, order=in_info.grid.order)
+        if len(in_data.shape) == 1:
+            in_data.data[0] = 1.0
+        else:
+            in_data.data[0, 0] = 1.0
 
-        source = fm.modules.CallbackGenerator(
+        self.source = fm.modules.CallbackGenerator(
             callbacks={
                 "Output": (
                     lambda t: in_data.copy(),
@@ -82,134 +33,166 @@ class TestAdapter(unittest.TestCase):
             step=timedelta(days=1),
         )
 
-        sink = fm.modules.DebugConsumer(
-            {"Input": fm.Info(None, grid=out_spec, units=None)},
+        self.sink = fm.modules.DebugConsumer(
+            {"Input": fm.Info(None, grid=out_grid, units=None)},
             start=datetime(2000, 1, 1),
             step=timedelta(days=1),
         )
 
-        composition = fm.Composition([source, sink])
-        composition.initialize()
+        self.composition = fm.Composition([self.source, self.sink])
+        self.composition.initialize()
 
-        (source.outputs["Output"] >> Regrid() >> sink.inputs["Input"])
+        (
+            self.source.outputs["Output"]
+            >> Regrid(regrid_method=regrid_method)
+            >> self.sink.inputs["Input"]
+        )
 
-        composition.connect()
+    def test_adapter_grid_nearest(self):
+        self.setup_run(
+            regrid_method=RegridMethod.NEAREST_STOD,
+            in_grid=fm.UniformGrid(
+                dims=(3, 7),
+                spacing=(3.0, 3.0, 3.0),
+                data_location=fm.Location.POINTS,
+            ),
+            out_grid=fm.UniformGrid(dims=(9, 19), data_location=fm.Location.POINTS),
+        )
+        self.composition.run(end_time=datetime(2000, 1, 5))
 
-        composition.run(end_time=datetime(2000, 1, 5))
+        result = self.sink.data["Input"]
+        self.assertEqual(result[0, 0, 0], 1.0 * fm.UNITS.meter)
+        self.assertEqual(result[0, 0, 1], 1.0 * fm.UNITS.meter)
+        self.assertEqual(result[0, 1, 0], 1.0 * fm.UNITS.meter)
+        self.assertEqual(result[0, 1, 1], 1.0 * fm.UNITS.meter)
+        self.assertEqual(result[0, 0, 2], 0.0 * fm.UNITS.meter)
+        self.assertEqual(result[0, 2, 0], 0.0 * fm.UNITS.meter)
 
-        result = sink.data["Input"]
+    def test_adapter_grid_linear(self):
+        self.setup_run(
+            regrid_method=RegridMethod.BILINEAR,
+            in_grid=fm.UniformGrid(
+                dims=(5, 10),
+                spacing=(2.0, 2.0, 2.0),
+                data_location=fm.Location.POINTS,
+            ),
+            out_grid=fm.UniformGrid(dims=(9, 19), data_location=fm.Location.POINTS),
+        )
+        self.composition.run(end_time=datetime(2000, 1, 5))
 
-    def test_adapter_conserve(self):
-        time = datetime(2000, 1, 1)
-        in_info = fm.Info(
-            time=time,
-            grid=fm.UniformGrid(
+        result = self.sink.data["Input"]
+        self.assertEqual(result[0, 0, 0], 1.0 * fm.UNITS.meter)
+        self.assertEqual(result[0, 0, 1], 0.5 * fm.UNITS.meter)
+        self.assertEqual(result[0, 1, 0], 0.5 * fm.UNITS.meter)
+        self.assertEqual(result[0, 1, 1], 0.25 * fm.UNITS.meter)
+
+    def test_adapter_grid_conserve(self):
+        self.setup_run(
+            regrid_method=RegridMethod.CONSERVE,
+            in_grid=fm.UniformGrid(
                 dims=(5, 10),
                 spacing=(2.0, 2.0, 2.0),
             ),
-            units="m",
+            out_grid=fm.UniformGrid(dims=(9, 19)),
         )
-        out_spec = fm.UniformGrid(dims=(9, 19))
+        self.composition.run(end_time=datetime(2000, 1, 5))
 
-        in_data = np.zeros(shape=in_info.grid.data_shape, order=in_info.grid.order)
-        in_data.data[0, 0] = 1.0
-
-        source = fm.modules.CallbackGenerator(
-            callbacks={
-                "Output": (
-                    lambda t: in_data.copy(),
-                    in_info,
-                )
-            },
-            start=datetime(2000, 1, 1),
-            step=timedelta(days=1),
-        )
-
-        sink = fm.modules.DebugConsumer(
-            {"Input": fm.Info(None, grid=out_spec, units=None)},
-            start=datetime(2000, 1, 1),
-            step=timedelta(days=1),
-        )
-
-        composition = fm.Composition([source, sink])
-        composition.initialize()
-
-        (
-            source.outputs["Output"]
-            >> Regrid(regrid_method=RegridMethod.CONSERVE)
-            >> sink.inputs["Input"]
-        )
-
-        composition.connect()
-
-        composition.run(end_time=datetime(2000, 1, 5))
-
-        result = sink.data["Input"]
+        result = self.sink.data["Input"]
         self.assertEqual(result[0, 0, 0], 1.0 * fm.UNITS.meter)
         self.assertEqual(result[0, 0, 1], 1.0 * fm.UNITS.meter)
         self.assertEqual(result[0, 1, 0], 1.0 * fm.UNITS.meter)
         self.assertEqual(result[0, 1, 1], 1.0 * fm.UNITS.meter)
 
-    def test_adapter_crs(self):
-        time = datetime(2000, 1, 1)
-        in_info = fm.Info(
-            time=time,
-            grid=fm.UniformGrid(
+    def test_adapter_grid_conserve_2nd(self):
+        self.setup_run(
+            regrid_method=RegridMethod.CONSERVE_2ND,
+            in_grid=fm.UniformGrid(
+                dims=(5, 10),
+                spacing=(2.0, 2.0, 2.0),
+            ),
+            out_grid=fm.UniformGrid(dims=(9, 19)),
+        )
+        self.composition.run(end_time=datetime(2000, 1, 5))
+
+        result = self.sink.data["Input"]
+        self.assertEqual(result[0, 0, 0], 1.0 * fm.UNITS.meter)
+        self.assertEqual(result[0, 0, 1], 1.0 * fm.UNITS.meter)
+        self.assertEqual(result[0, 1, 0], 1.0 * fm.UNITS.meter)
+        self.assertEqual(result[0, 1, 1], 1.0 * fm.UNITS.meter)
+
+    def test_adapter_grid_crs(self):
+        out_grid = fm.UniformGrid(
+            dims=(9, 19), data_location=fm.Location.POINTS, crs="EPSG:25832"
+        )
+
+        self.setup_run(
+            regrid_method=RegridMethod.BILINEAR,
+            in_grid=fm.UniformGrid(
                 dims=(5, 10),
                 spacing=(2.0, 2.0, 2.0),
                 data_location=fm.Location.POINTS,
                 crs="EPSG:32632",
             ),
-            units="m",
+            out_grid=out_grid,
         )
-        out_spec = fm.UniformGrid(
-            dims=(9, 19), data_location=fm.Location.POINTS, crs="EPSG:25832"
+        self.composition.run(end_time=datetime(2000, 1, 2))
+
+        self.assertEqual(self.sink.inputs["Input"].info.grid, out_grid)
+        self.assertAlmostEqual(
+            fm.data.get_magnitude(self.sink.data["Input"])[0, 0, 0], 1.0
         )
-
-        in_data = np.zeros(shape=in_info.grid.data_shape, order=in_info.grid.order)
-        in_data.data[0, 0] = 1.0
-
-        source = fm.modules.CallbackGenerator(
-            callbacks={"Output": (lambda t: in_data.copy(), in_info)},
-            start=datetime(2000, 1, 1),
-            step=timedelta(days=1),
+        self.assertAlmostEqual(
+            fm.data.get_magnitude(self.sink.data["Input"])[0, 0, 1], 0.5
         )
-
-        sink = fm.modules.DebugConsumer(
-            {"Input": fm.Info(None, grid=out_spec, units=None)},
-            start=datetime(2000, 1, 1),
-            step=timedelta(days=1),
+        self.assertAlmostEqual(
+            fm.data.get_magnitude(self.sink.data["Input"])[0, 1, 0], 0.5
+        )
+        self.assertAlmostEqual(
+            fm.data.get_magnitude(self.sink.data["Input"])[0, 1, 1], 0.25
         )
 
-        composition = fm.Composition([source, sink])
-        composition.initialize()
+    def test_adapter_mesh_nearest(self):
+        self.setup_run(
+            regrid_method=RegridMethod.NEAREST_STOD,
+            in_grid=_create_mesh(),
+            out_grid=_create_mesh(),
+        )
+        self.composition.run(end_time=datetime(2000, 1, 5))
+        result = self.sink.data["Input"]
 
-        (source.outputs["Output"] >> Regrid() >> sink.inputs["Input"])
+    def test_adapter_mesh_linear(self):
+        self.setup_run(
+            regrid_method=RegridMethod.BILINEAR,
+            in_grid=_create_mesh(),
+            out_grid=_create_mesh(),
+        )
+        self.composition.run(end_time=datetime(2000, 1, 5))
+        result = self.sink.data["Input"]
 
-        composition.run(end_time=datetime(2000, 1, 2))
+    def test_adapter_mesh_conserve(self):
+        self.setup_run(
+            regrid_method=RegridMethod.CONSERVE,
+            in_grid=_create_mesh(),
+            out_grid=_create_mesh(),
+        )
+        self.composition.run(end_time=datetime(2000, 1, 5))
+        result = self.sink.data["Input"]
 
-        self.assertEqual(sink.inputs["Input"].info.grid, out_spec)
-        self.assertAlmostEqual(fm.data.get_magnitude(sink.data["Input"])[0, 0, 0], 1.0)
-        self.assertAlmostEqual(fm.data.get_magnitude(sink.data["Input"])[0, 0, 1], 0.5)
-        self.assertAlmostEqual(fm.data.get_magnitude(sink.data["Input"])[0, 1, 0], 0.5)
-        self.assertAlmostEqual(fm.data.get_magnitude(sink.data["Input"])[0, 1, 1], 0.25)
+    def test_adapter_mesh_conserve_2nd(self):
+        self.setup_run(
+            regrid_method=RegridMethod.CONSERVE_2ND,
+            in_grid=_create_mesh(),
+            out_grid=_create_mesh(),
+        )
+        self.composition.run(end_time=datetime(2000, 1, 5))
+        result = self.sink.data["Input"]
 
 
 def _create_mesh():
-    points = [
-        [0, 0],
-        [1, 0],
-        [0, 1],
-        [1, 1],
-    ]
-    cells = [
-        [0, 1, 3],
-        [0, 3, 2],
-    ]
-    types = [
-        fm.CellType.TRI,
-        fm.CellType.TRI,
-    ]
+    grid = fm.UniformGrid((16, 13))
+    points = grid.points
+    cells = grid.cells
+    types = grid.cell_types
     grid = fm.UnstructuredGrid(points, cells, types, data_location=fm.Location.CELLS)
 
     return grid
