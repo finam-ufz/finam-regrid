@@ -56,6 +56,49 @@ class TestAdapter(unittest.TestCase):
         self.assertEqual(result[0, 1, 0], 0.5 * fm.UNITS.meter)
         self.assertEqual(result[0, 1, 1], 0.25 * fm.UNITS.meter)
 
+    def test_adapter_mesh(self):
+        time = datetime(2000, 1, 1)
+
+        in_grid = _create_mesh()
+
+        in_info = fm.Info(
+            time=time,
+            grid=in_grid,
+            units="m",
+        )
+        out_spec = _create_mesh()
+
+        in_data = fm.data.full(0.0, "data", fm.Info(time=None, grid=in_grid))
+        in_data.data[0] = 1.0
+
+        source = fm.modules.CallbackGenerator(
+            callbacks={
+                "Output": (
+                    lambda t: in_data.copy(),
+                    in_info,
+                )
+            },
+            start=datetime(2000, 1, 1),
+            step=timedelta(days=1),
+        )
+
+        sink = fm.modules.DebugConsumer(
+            {"Input": fm.Info(None, grid=out_spec, units=None)},
+            start=datetime(2000, 1, 1),
+            step=timedelta(days=1),
+        )
+
+        composition = fm.Composition([source, sink])
+        composition.initialize()
+
+        (source.outputs["Output"] >> Regrid() >> sink.inputs["Input"])
+
+        composition.connect()
+
+        composition.run(end_time=datetime(2000, 1, 5))
+
+        result = sink.data["Input"]
+
     def test_adapter_conserve(self):
         time = datetime(2000, 1, 1)
         in_info = fm.Info(
@@ -150,3 +193,23 @@ class TestAdapter(unittest.TestCase):
         self.assertAlmostEqual(fm.data.get_magnitude(sink.data["Input"])[0, 0, 1], 0.5)
         self.assertAlmostEqual(fm.data.get_magnitude(sink.data["Input"])[0, 1, 0], 0.5)
         self.assertAlmostEqual(fm.data.get_magnitude(sink.data["Input"])[0, 1, 1], 0.25)
+
+
+def _create_mesh():
+    points = [
+        [0, 0],
+        [1, 0],
+        [0, 1],
+        [1, 1],
+    ]
+    cells = [
+        [0, 1, 3],
+        [0, 3, 2],
+    ]
+    types = [
+        fm.CellType.TRI,
+        fm.CellType.TRI,
+    ]
+    grid = fm.UnstructuredGrid(points, cells, types, data_location=fm.Location.CELLS)
+
+    return grid

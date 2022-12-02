@@ -81,11 +81,6 @@ class Regrid(fm.adapters.regrid.ARegridding):
         self.in_grid, self.in_field = to_esmf(self.input_grid, transformer)
         self.out_grid, self.out_field = to_esmf(self.output_grid)
 
-        if isinstance(self.in_grid, ESMF.Mesh):
-            self.in_grid.free_memory()
-        if isinstance(self.out_grid, ESMF.Mesh):
-            self.out_grid.free_memory()
-
         self.regrid = ESMF.Regrid(
             self.in_field,
             self.out_field,
