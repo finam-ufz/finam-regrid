@@ -13,6 +13,9 @@ class TestRegrid(unittest.TestCase):
     def setupBenchmark(self, benchmark):
         self.benchmark = benchmark
 
+    def tearDown(self):
+        self.adapter.finalize()
+
     def setup_adapter(self, grid1, grid2, adapter):
         self.adapter = None
         self.source = None
