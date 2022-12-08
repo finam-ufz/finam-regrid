@@ -90,7 +90,7 @@ class Regrid(fm.adapters.regrid.ARegridding):
     def _get_data(self, time, target):
         in_data = self.pull_data(time, target)
 
-        self.in_field.data[:] = fm.data.get_magnitude(fm.data.strip_time(in_data))[:]
+        self.in_field.data[:] = fm.data.strip_time(in_data, self.input_grid).magnitude
         self.out_field.data[:] = np.nan
 
         self.regrid(self.in_field, self.out_field)
