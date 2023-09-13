@@ -2,6 +2,7 @@
 import ESMF
 import finam as fm
 import numpy as np
+from finam.tools.log_helper import ErrorLogger
 
 from .tools import create_transformer, to_esmf
 
@@ -13,6 +14,11 @@ class Regrid(fm.adapters.regrid.ARegridding):
     Supports all of ESMPy's  :class:`regridding methods <.RegridMethod>`.
     For parameters passed as ``**regrid_args``, see the ESMPy class
     `Regrid <https://earthsystemmodeling.org/esmpy_doc/release/latest/html/regrid.html>`_
+
+
+    .. warning::
+        Does currently not support masked input data. Raises a ``NotImplementedError`` in that case.
+
 
     Examples
     --------
@@ -89,6 +95,11 @@ class Regrid(fm.adapters.regrid.ARegridding):
 
     def _get_data(self, time, target):
         in_data = self.pull_data(time, target)
+
+        if fm.data.is_masked_array(in_data):
+            with ErrorLogger(self.logger):
+                msg = "Regridding is currently not implemented for masked data"
+                raise NotImplementedError(msg)
 
         self.in_field.data[:] = fm.data.strip_time(in_data, self.input_grid).magnitude
         self.out_field.data[:] = np.nan
