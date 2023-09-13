@@ -50,7 +50,7 @@ def _transform_points(transformer, points):
 
 def to_esmf(grid, transformer=None):
     """Converts a FINAM grid specification to the corresponding ESMF type."""
-    if isinstance(grid, fm.data.grid_tools.StructuredGrid):
+    if isinstance(grid, fm.data.StructuredGrid):
         return _to_esmf_grid(grid, transformer)
     if isinstance(grid, fm.UnstructuredPoints):
         return _to_esmf_points(grid, transformer)
@@ -60,7 +60,7 @@ def to_esmf(grid, transformer=None):
     raise ValueError(f"Grid type '{grid.__class__.__name__}' not supported")
 
 
-def _to_esmf_grid(grid: fm.data.grid_tools.StructuredGrid, transformer):
+def _to_esmf_grid(grid: fm.data.StructuredGrid, transformer):
     dims = np.array([d - 1 for d in grid.dims], dtype=np.int32)
     loc = ESMF_STAGGER_LOC[grid.data_location]
 
