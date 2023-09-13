@@ -11,7 +11,7 @@ name = "finam_regrid"
 description = "FINAM ESMPy regridding adapters."
 authors = [{name = "FINAM Developers", email = "finam@ufz.de"}]
 readme = "README.md"
-license = {text = "LGPLv3"}
+license = "LGPL-3.0"
 dynamic = ["version"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -37,7 +37,7 @@ dependencies = [
     "numpy>=1.14.5",
     "xarray>=2022.03",
     "pyproj>=3.4",
-    "finam @ git+https://git.ufz.de/FINAM/finam.git@de3f0f0",
+    "finam>=0.5.0",
 ]
 
 [project.urls]
@@ -49,10 +49,10 @@ Changelog = "https://git.ufz.de/FINAM/finam-regrid/-/blob/main/finam-regrid/CHAN
 
 [project.optional-dependencies]
 doc = [
-    "sphinx>=5",
-    "pydata-sphinx-theme==0.11",
+    "sphinx>=6",
+    "pydata-sphinx-theme==0.13",
     "numpydoc>=1.1",
-    "sphinx-design>=0.3",
+    "sphinx-design>=0.4",
     "esmpy>=8.4",
     "docutils>=0.18", # mdinclude with myst
 ]
