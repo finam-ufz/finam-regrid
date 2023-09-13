@@ -1,5 +1,5 @@
 """ESMF regridding adapters."""
-import ESMF
+import esmpy
 import finam as fm
 import numpy as np
 from finam.tools.log_helper import ErrorLogger
@@ -79,7 +79,7 @@ class Regrid(fm.adapters.regrid.ARegridding):
         self.out_field = None
 
         if "unmapped_action" not in self.regrid_args:
-            self.regrid_args["unmapped_action"] = ESMF.UnmappedAction.IGNORE
+            self.regrid_args["unmapped_action"] = esmpy.UnmappedAction.IGNORE
 
     def _update_grid_specs(self):
         transformer = create_transformer(self.input_grid.crs, self.output_grid.crs)
@@ -87,7 +87,7 @@ class Regrid(fm.adapters.regrid.ARegridding):
         self.in_grid, self.in_field = to_esmf(self.input_grid, transformer)
         self.out_grid, self.out_field = to_esmf(self.output_grid)
 
-        self.regrid = ESMF.Regrid(
+        self.regrid = esmpy.Regrid(
             self.in_field,
             self.out_field,
             **self.regrid_args,

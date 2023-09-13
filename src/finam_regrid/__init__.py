@@ -27,7 +27,7 @@ Constants
     RegridMethod
     UnmappedAction
 """
-from ESMF.api.constants import ExtrapMethod, RegridMethod, UnmappedAction
+from esmpy.api.constants import ExtrapMethod, RegridMethod, UnmappedAction
 
 from .adapter import Regrid
 
