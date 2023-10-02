@@ -1,9 +1,9 @@
 [build-system]
 requires = [
-    "setuptools>=64",
-    "setuptools_scm[toml]>=6.4",
+    "hatchling>=1.8.0",
+    "hatch-vcs",
 ]
-build-backend = "setuptools.build_meta"
+build-backend = "hatchling.build"
 
 [project]
 requires-python = ">=3.8"
@@ -11,7 +11,7 @@ name = "finam_regrid"
 description = "FINAM ESMPy regridding adapters."
 authors = [{name = "FINAM Developers", email = "finam@ufz.de"}]
 readme = "README.md"
-license = {text = "LGPLv3"}
+license = "LGPL-3.0"
 dynamic = ["version"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -29,6 +29,7 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Topic :: Scientific/Engineering",
     "Topic :: Software Development",
     "Topic :: Utilities",
@@ -37,7 +38,8 @@ dependencies = [
     "numpy>=1.14.5",
     "xarray>=2022.03",
     "pyproj>=3.4",
-    "finam @ git+https://git.ufz.de/FINAM/finam.git",
+    "esmpy>=8.4",
+    "finam>=0.5.0",
 ]
 
 [project.urls]
@@ -49,11 +51,11 @@ Changelog = "https://git.ufz.de/FINAM/finam-regrid/-/blob/main/finam-regrid/CHAN
 
 [project.optional-dependencies]
 doc = [
-    "sphinx>=5",
-    "pydata-sphinx-theme==0.11",
+    "sphinx>=6",
+    "pydata-sphinx-theme==0.13",
     "numpydoc>=1.1",
-    "sphinx-design>=0.3",
-    "esmpy>=8.1",
+    "sphinx-design>=0.4",
+    "myst-parser>=1.0",
     "docutils>=0.18", # mdinclude with myst
 ]
 test = [
@@ -64,11 +66,28 @@ test = [
 [tool.setuptools]
 license-files = ["LICENSE"]
 
-[tool.setuptools_scm]
-write_to = "src/finam_regrid/_version.py"
-write_to_template = "__version__ = '{version}'"
-local_scheme = "no-local-version"
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.version]
+source = "vcs"
 fallback_version = "0.0.0.dev0"
+
+[tool.hatch.version.raw-options]
+local_scheme = "no-local-version"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/finam_regrid/_version.py"
+template = "__version__ = '{version}'"
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/src",
+  "/tests",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/finam_regrid"]
 
 [tool.black]
 exclude = "_version.py"

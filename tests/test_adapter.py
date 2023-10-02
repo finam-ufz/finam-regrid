@@ -8,7 +8,7 @@ from finam_regrid import Regrid, RegridMethod
 
 
 class TestAdapter(unittest.TestCase):
-    def setup_run(self, in_grid, out_grid, regrid_method):
+    def setup_run(self, in_grid, out_grid, regrid_method, masked=False):
         time = datetime(2000, 1, 1)
         in_info = fm.Info(
             time=time,
@@ -21,6 +21,9 @@ class TestAdapter(unittest.TestCase):
             in_data.data[0] = 1.0
         else:
             in_data.data[0, 0] = 1.0
+
+        if masked:
+            in_data = np.ma.masked_where(in_data > 0, in_data)
 
         self.source = fm.modules.CallbackGenerator(
             callbacks={
@@ -67,6 +70,20 @@ class TestAdapter(unittest.TestCase):
         self.assertEqual(result[0, 1, 1], 1.0 * fm.UNITS.meter)
         self.assertEqual(result[0, 0, 2], 0.0 * fm.UNITS.meter)
         self.assertEqual(result[0, 2, 0], 0.0 * fm.UNITS.meter)
+
+    def test_adapter_grid_nearest_masked(self):
+        self.setup_run(
+            regrid_method=RegridMethod.NEAREST_STOD,
+            in_grid=fm.UniformGrid(
+                dims=(3, 7),
+                spacing=(3.0, 3.0, 3.0),
+                data_location=fm.Location.POINTS,
+            ),
+            out_grid=fm.UniformGrid(dims=(9, 19), data_location=fm.Location.POINTS),
+            masked=True,
+        )
+        with self.assertRaises(NotImplementedError):
+            self.composition.run(end_time=datetime(2000, 1, 5))
 
     def test_adapter_grid_linear(self):
         self.setup_run(

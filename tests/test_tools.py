@@ -1,6 +1,6 @@
 import unittest
 
-import ESMF
+import esmpy
 import finam as fm
 from numpy.testing import assert_allclose
 
@@ -17,12 +17,12 @@ class TestTools(unittest.TestCase):
 
         g, f = to_esmf(grid)
 
-        self.assertIsInstance(g, ESMF.Grid)
+        self.assertIsInstance(g, esmpy.Grid)
         assert_allclose(
-            g.get_coords(0, staggerloc=ESMF.StaggerLoc.CORNER)[:, 0], grid.axes[0]
+            g.get_coords(0, staggerloc=esmpy.StaggerLoc.CORNER)[:, 0], grid.axes[0]
         )
         assert_allclose(
-            g.get_coords(1, staggerloc=ESMF.StaggerLoc.CORNER)[0, :], grid.axes[1]
+            g.get_coords(1, staggerloc=esmpy.StaggerLoc.CORNER)[0, :], grid.axes[1]
         )
 
     def test_to_esmf_grid_point(self):
@@ -30,12 +30,12 @@ class TestTools(unittest.TestCase):
 
         g, f = to_esmf(grid)
 
-        self.assertIsInstance(g, ESMF.Grid)
+        self.assertIsInstance(g, esmpy.Grid)
         assert_allclose(
-            g.get_coords(0, staggerloc=ESMF.StaggerLoc.CORNER)[:, 0], grid.axes[0]
+            g.get_coords(0, staggerloc=esmpy.StaggerLoc.CORNER)[:, 0], grid.axes[0]
         )
         assert_allclose(
-            g.get_coords(1, staggerloc=ESMF.StaggerLoc.CORNER)[0, :], grid.axes[1]
+            g.get_coords(1, staggerloc=esmpy.StaggerLoc.CORNER)[0, :], grid.axes[1]
         )
 
     def test_to_esmf_mesh(self):
@@ -59,7 +59,7 @@ class TestTools(unittest.TestCase):
 
         g, f = to_esmf(grid)
 
-        self.assertIsInstance(g, ESMF.Mesh)
+        self.assertIsInstance(g, esmpy.Mesh)
 
     def test_to_esmf_points(self):
         points = [
@@ -72,7 +72,7 @@ class TestTools(unittest.TestCase):
 
         g, f = to_esmf(grid)
 
-        self.assertIsInstance(g, ESMF.LocStream)
+        self.assertIsInstance(g, esmpy.LocStream)
 
     def test_regrid(self):
         grid1 = fm.UniformGrid((21, 17))
@@ -81,11 +81,11 @@ class TestTools(unittest.TestCase):
         g1, f1 = to_esmf(grid1)
         g2, f2 = to_esmf(grid2)
 
-        regrid = ESMF.Regrid(
+        regrid = esmpy.Regrid(
             f1,
             f2,
-            regrid_method=ESMF.RegridMethod.BILINEAR,
-            unmapped_action=ESMF.UnmappedAction.IGNORE,
+            regrid_method=esmpy.RegridMethod.BILINEAR,
+            unmapped_action=esmpy.UnmappedAction.IGNORE,
         )
 
         f1.data[:] = 2.0

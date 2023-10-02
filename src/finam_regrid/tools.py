@@ -1,26 +1,26 @@
 """Tools for ESMF regridding."""
 from __future__ import annotations
 
-import ESMF
+import esmpy
 import finam as fm
 import numpy as np
 from pyproj import Transformer, crs
 
 ESMF_CELLTYPES = {
-    fm.CellType.TRI: ESMF.api.constants.MeshElemType.TRI,
-    fm.CellType.QUAD: ESMF.api.constants.MeshElemType.QUAD,
+    fm.CellType.TRI: esmpy.api.constants.MeshElemType.TRI,
+    fm.CellType.QUAD: esmpy.api.constants.MeshElemType.QUAD,
 }
 
 ESMF_DIM_NAMES = ["ESMF:X", "ESMF:Y", "ESMF:Z"]
 
 ESMF_STAGGER_LOC = {
-    fm.Location.CELLS: ESMF.StaggerLoc.CENTER,
-    fm.Location.POINTS: ESMF.StaggerLoc.CORNER,
+    fm.Location.CELLS: esmpy.StaggerLoc.CENTER,
+    fm.Location.POINTS: esmpy.StaggerLoc.CORNER,
 }
 
 ESMF_MESH_LOC = {
-    fm.Location.CELLS: ESMF.MeshLoc.ELEMENT,
-    fm.Location.POINTS: ESMF.MeshLoc.NODE,
+    fm.Location.CELLS: esmpy.MeshLoc.ELEMENT,
+    fm.Location.POINTS: esmpy.MeshLoc.NODE,
 }
 
 
@@ -50,7 +50,7 @@ def _transform_points(transformer, points):
 
 def to_esmf(grid, transformer=None):
     """Converts a FINAM grid specification to the corresponding ESMF type."""
-    if isinstance(grid, fm.data.grid_tools.StructuredGrid):
+    if isinstance(grid, fm.data.StructuredGrid):
         return _to_esmf_grid(grid, transformer)
     if isinstance(grid, fm.UnstructuredPoints):
         return _to_esmf_points(grid, transformer)
@@ -60,29 +60,29 @@ def to_esmf(grid, transformer=None):
     raise ValueError(f"Grid type '{grid.__class__.__name__}' not supported")
 
 
-def _to_esmf_grid(grid: fm.data.grid_tools.StructuredGrid, transformer):
+def _to_esmf_grid(grid: fm.data.StructuredGrid, transformer):
     dims = np.array([d - 1 for d in grid.dims], dtype=np.int32)
     loc = ESMF_STAGGER_LOC[grid.data_location]
 
-    g = ESMF.Grid(
+    g = esmpy.Grid(
         dims,
         staggerloc=[],
-        coord_sys=ESMF.CoordSys.CART,
+        coord_sys=esmpy.CoordSys.CART,
     )
-    g.add_coords(staggerloc=ESMF.StaggerLoc.CENTER)
-    g.add_coords(staggerloc=ESMF.StaggerLoc.CORNER)
+    g.add_coords(staggerloc=esmpy.StaggerLoc.CENTER)
+    g.add_coords(staggerloc=esmpy.StaggerLoc.CORNER)
 
     points = _transform_points(transformer, grid.points)
     cells = _transform_points(transformer, grid.cell_centers)
 
     for i in range(len(grid.axes)):
-        grid_corner = g.get_coords(i, staggerloc=ESMF.StaggerLoc.CORNER)
-        grid_center = g.get_coords(i, staggerloc=ESMF.StaggerLoc.CENTER)
+        grid_corner = g.get_coords(i, staggerloc=esmpy.StaggerLoc.CORNER)
+        grid_center = g.get_coords(i, staggerloc=esmpy.StaggerLoc.CENTER)
 
         grid_corner[...] = points[:, i].reshape(grid.dims, order=grid.order)
         grid_center[...] = cells[:, i].reshape(dims, order=grid.order)
 
-    field = ESMF.Field(g, name=grid.name, staggerloc=loc)
+    field = esmpy.Field(g, name=grid.name, staggerloc=loc)
     field.data[:] = np.nan
 
     return g, field
@@ -91,8 +91,10 @@ def _to_esmf_grid(grid: fm.data.grid_tools.StructuredGrid, transformer):
 def _to_esmf_mesh(grid: fm.UnstructuredGrid, transformer):
     loc = ESMF_MESH_LOC[grid.data_location]
 
-    mesh = ESMF.Mesh(
-        parametric_dim=grid.mesh_dim, spatial_dim=grid.dim, coord_sys=ESMF.CoordSys.CART
+    mesh = esmpy.Mesh(
+        parametric_dim=grid.mesh_dim,
+        spatial_dim=grid.dim,
+        coord_sys=esmpy.CoordSys.CART,
     )
 
     node_ids = np.arange(grid.point_count)
@@ -118,21 +120,21 @@ def _to_esmf_mesh(grid: fm.UnstructuredGrid, transformer):
         element_coords=grid.cell_centers,
     )
 
-    field = ESMF.Field(mesh, name=grid.name, meshloc=loc)
+    field = esmpy.Field(mesh, name=grid.name, meshloc=loc)
     field.data[:] = np.nan
 
     return mesh, field
 
 
 def _to_esmf_points(grid: fm.UnstructuredPoints, transformer):
-    locstream = ESMF.LocStream(grid.point_count, coord_sys=ESMF.CoordSys.CART)
+    locstream = esmpy.LocStream(grid.point_count, coord_sys=esmpy.CoordSys.CART)
 
     points = _transform_points(transformer, grid.points)
 
     for i in range(grid.dim):
         locstream[ESMF_DIM_NAMES[i]] = points[:, i]
 
-    field = ESMF.Field(locstream, name=grid.name)
+    field = esmpy.Field(locstream, name=grid.name)
     field.data[:] = np.nan
 
     return locstream, field
