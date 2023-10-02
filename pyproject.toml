@@ -38,6 +38,7 @@ dependencies = [
     "numpy>=1.14.5",
     "xarray>=2022.03",
     "pyproj>=3.4",
+    "esmpy>=8.4",
     "finam>=0.5.0",
 ]
 
@@ -54,7 +55,7 @@ doc = [
     "pydata-sphinx-theme==0.13",
     "numpydoc>=1.1",
     "sphinx-design>=0.4",
-    "esmpy>=8.4",
+    "myst-parser>=1.0",
     "docutils>=0.18", # mdinclude with myst
 ]
 test = [
