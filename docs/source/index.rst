@@ -27,7 +27,7 @@ Now, install :mod:`finam_regrid` and other required packages using `pip <https:/
 
 .. code-block:: Shell
 
-    $ pip install git+https://git.ufz.de/FINAM/finam-regrid.git
+    $ pip install finam-regrid
 
 Usage
 -----
