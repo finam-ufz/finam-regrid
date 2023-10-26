@@ -12,7 +12,7 @@ check:
   before_script:
     - conda create -n esmf -c conda-forge esmpy
     - source activate esmf
-    - pip3 install black 'pylint<3' 'isort[colors]<6'
+    - pip3 install black 'pylint>=3' 'isort[colors]<6'
   script:
     - pip3 install .
     - black --check --diff --color .
