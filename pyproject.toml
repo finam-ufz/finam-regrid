@@ -36,15 +36,14 @@ classifiers = [
 ]
 dependencies = [
     "numpy>=1.14.5",
-    "xarray>=2022.03",
     "pyproj>=3.4",
     "esmpy>=8.4",
-    "finam>=0.5.0",
+    "finam>0.5.1",  # need dev version for now
 ]
 
 [project.urls]
-Homepage = "https://FINAM-regrid.pages.ufz.de/"
-Documentation = "https://FINAM-regrid.pages.ufz.de/"
+Homepage = "https://finam.pages.ufz.de/finam-regrid/"
+Documentation = "https://finam.pages.ufz.de/finam-regrid/"
 Source = "https://git.ufz.de/FINAM/finam-regrid"
 Tracker = "https://git.ufz.de/FINAM/finam-regrid/-/issues"
 Changelog = "https://git.ufz.de/FINAM/finam-regrid/-/blob/main/finam-regrid/CHANGELOG.md"
