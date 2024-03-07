@@ -108,6 +108,7 @@ tags
 
 # own stuff
 info/
+PET0.ESMF_LogFile
 
 # Cython generated C code
 *.c
