@@ -213,3 +213,7 @@ def _create_mesh():
     grid = fm.UnstructuredGrid(points, cells, types, data_location=fm.Location.CELLS)
 
     return grid
+
+
+if __name__ == "__main__":
+    unittest.main()
