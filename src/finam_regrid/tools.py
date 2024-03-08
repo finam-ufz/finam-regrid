@@ -125,7 +125,7 @@ def _to_esmf_mesh(grid: fm.UnstructuredGrid, transformer):
     if np.any(elem_types == -1):
         # this should only occure for line elements in 1D
         # vertices are covered by the UnstructuredPoints class
-        raise ValueError(f"ESMF can't be used to regrid 1D data.")
+        raise ValueError("ESMF can't be used to regrid 1D data.")
 
     mesh.add_elements(
         element_count=num_elem,
