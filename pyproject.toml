@@ -38,7 +38,7 @@ dependencies = [
     "numpy>=1.14.5",
     "pyproj>=3.4",
     "esmpy>=8.4",
-    "finam>0.5.1",  # need dev version for now
+    "finam @ git+https://git.ufz.de/FINAM/finam.git",  # need dev version for now
 ]
 
 [project.urls]
