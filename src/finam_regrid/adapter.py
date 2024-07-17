@@ -56,6 +56,9 @@ class Regrid(fm.adapters.regrid.ARegridding):
         Input grid specification. Will be retrieved from upstream component if not specified.
     out_grid : finam.Grid, optional
         Output grid specification. Will be retrieved from downstream component if not specified.
+    zero_region : Region or None, optional
+        specify which region of the field indices will be zeroed out before
+        adding the values resulting from the interpolation. If None, defaults to Region.TOTAL.
     **regrid_args : Any
         Keyword argument passed to the ESMPy class
         `Regrid <https://earthsystemmodeling.org/esmpy_doc/release/latest/html/regrid.html>`_.
@@ -70,7 +73,7 @@ class Regrid(fm.adapters.regrid.ARegridding):
         Action on unmapped cells. See :class:`.UnmappedAction`. Defaults to :attr:`.UnmappedAction.IGNORE`.
     """
 
-    def __init__(self, in_grid=None, out_grid=None, **regrid_args):
+    def __init__(self, in_grid=None, out_grid=None, zero_region=None, **regrid_args):
         super().__init__(in_grid, out_grid)
         self.regrid_args = regrid_args
         self.regrid = None
@@ -78,6 +81,7 @@ class Regrid(fm.adapters.regrid.ARegridding):
         self.out_grid = None
         self.in_field = None
         self.out_field = None
+        self.zero_region = zero_region
 
         if "unmapped_action" not in self.regrid_args:
             self.regrid_args["unmapped_action"] = esmpy.UnmappedAction.IGNORE
@@ -107,7 +111,7 @@ class Regrid(fm.adapters.regrid.ARegridding):
         )
         self.out_field.data[...] = np.nan
 
-        self.regrid(self.in_field, self.out_field)  # , zero_region=esmpy.Region.EMPTY)
+        self.regrid(self.in_field, self.out_field, zero_region=self.zero_region)
 
         return self.output_grid.from_canonical(self.out_field.data) * fm.data.get_units(
             in_data
