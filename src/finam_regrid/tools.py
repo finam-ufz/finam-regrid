@@ -80,8 +80,10 @@ def _to_esmf_grid(grid: fm.data.StructuredGrid, transformer):
     g.add_coords(staggerloc=ESMF_STAGGER_LOC[grid_dim][fm.Location.POINTS])
     g.add_coords(staggerloc=ESMF_STAGGER_LOC[grid_dim][fm.Location.CELLS])
 
-    points = _transform_points(transformer, grid.points)
-    cell_centers = _transform_points(transformer, grid.cell_centers)
+    points = fm.data.grid_tools.gen_points(grid.axes, order=grid.order)
+    points = _transform_points(transformer, points)
+    cell_centers = fm.data.grid_tools.gen_points(grid.cell_axes, order=grid.order)
+    cell_centers = _transform_points(transformer, cell_centers)
 
     for i in range(grid.dim):
         grid_corner = g.get_coords(

@@ -102,12 +102,16 @@ class Regrid(fm.adapters.regrid.ARegridding):
                 msg = "Regridding is currently not implemented for masked data"
                 raise NotImplementedError(msg)
 
-        self.in_field.data[:] = fm.data.strip_time(in_data, self.input_grid).magnitude
-        self.out_field.data[:] = np.nan
+        self.in_field.data[...] = self.input_grid.to_canonical(
+            fm.data.strip_time(in_data, self.input_grid).magnitude
+        )
+        self.out_field.data[...] = np.nan
 
-        self.regrid(self.in_field, self.out_field)
+        self.regrid(self.in_field, self.out_field)  # , zero_region=esmpy.Region.EMPTY)
 
-        return self.out_field.data * fm.data.get_units(in_data)
+        return self.output_grid.from_canonical(self.out_field.data) * fm.data.get_units(
+            in_data
+        )
 
     def _finalize(self):
         self.regrid.destroy()
