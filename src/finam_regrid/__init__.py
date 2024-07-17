@@ -24,6 +24,8 @@ Constants
    :caption: Constants
 
     ExtrapMethod
+    NormType
+    Region
     RegridMethod
     UnmappedAction
 """
