@@ -101,7 +101,7 @@ class Regrid(fm.adapters.regrid.ARegridding):
     def _get_data(self, time, target):
         in_data = self.pull_data(time, target)
 
-        if fm.data.is_masked_array(in_data):
+        if fm.data.has_masked_values(in_data):
             with ErrorLogger(self.logger):
                 msg = "Regridding is currently not implemented for masked data"
                 raise NotImplementedError(msg)
@@ -113,8 +113,9 @@ class Regrid(fm.adapters.regrid.ARegridding):
 
         self.regrid(self.in_field, self.out_field, zero_region=self.zero_region)
 
-        return self.output_grid.from_canonical(self.out_field.data) * fm.data.get_units(
-            in_data
+        return fm.UNITS.Quantity(
+            self.output_grid.from_canonical(self.out_field.data),
+            fm.data.get_units(in_data),
         )
 
     def _finalize(self):
