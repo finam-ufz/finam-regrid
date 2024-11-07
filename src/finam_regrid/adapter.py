@@ -82,16 +82,14 @@ class Regrid(fm.adapters.regrid.ARegridding):
         self.in_field = None
         self.out_field = None
         self.zero_region = zero_region
-
+        self.output_mask = fm.Mask.FLEX
         if "unmapped_action" not in self.regrid_args:
             self.regrid_args["unmapped_action"] = esmpy.UnmappedAction.IGNORE
 
     def _update_grid_specs(self):
         transformer = create_transformer(self.input_grid.crs, self.output_grid.crs)
-
-        self.in_grid, self.in_field = to_esmf(self.input_grid, transformer)
-        self.out_grid, self.out_field = to_esmf(self.output_grid)
-
+        self.in_grid, self.in_field = to_esmf(self.input_grid)
+        self.out_grid, self.out_field = to_esmf(self.output_grid, transformer)
         self.regrid = esmpy.Regrid(
             self.in_field,
             self.out_field,
@@ -113,10 +111,7 @@ class Regrid(fm.adapters.regrid.ARegridding):
 
         self.regrid(self.in_field, self.out_field, zero_region=self.zero_region)
 
-        return fm.UNITS.Quantity(
-            self.output_grid.from_canonical(self.out_field.data),
-            fm.data.get_units(in_data),
-        )
+        return self.output_grid.from_canonical(self.out_field.data)
 
     def _finalize(self):
         self.regrid.destroy()
