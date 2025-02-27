@@ -91,15 +91,15 @@ def _to_esmf_grid(grid: fm.data.StructuredGrid, transformer):
             grid_corner[...] = grid.axes[i].reshape(*_shp(i, grid.dim))
             grid_center[...] = grid.cell_axes[i].reshape(*_shp(i, grid.dim))
     else:
-        points = fm.data.grid_tools.gen_points(grid.axes, order="C")
+        points = fm.data.grid_tools.gen_points(grid.axes, order="F")
         points = _transform_points(transformer, points)
-        cell_centers = fm.data.grid_tools.gen_points(grid.cell_axes, order="C")
+        cell_centers = fm.data.grid_tools.gen_points(grid.cell_axes, order="F")
         cell_centers = _transform_points(transformer, cell_centers)
         for i in range(grid.dim):
             grid_corner = g.get_coords(i, staggerloc=p_loc)
             grid_center = g.get_coords(i, staggerloc=c_loc)
-            grid_corner[...] = points[:, i].reshape(grid.dims, order="C")
-            grid_center[...] = cell_centers[:, i].reshape(dims, order="C")
+            grid_corner[...] = points[:, i].reshape(grid.dims, order="F")
+            grid_center[...] = cell_centers[:, i].reshape(dims, order="F")
 
     field = esmpy.Field(g, name=grid.name, staggerloc=loc)
     field.data[:] = np.nan
