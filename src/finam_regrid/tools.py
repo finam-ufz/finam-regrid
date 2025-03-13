@@ -31,9 +31,9 @@ ESMF_MESH_LOC = {
 }
 
 
-def _shp(id, dim=3):
+def _shp(i, dim=3):
     res = dim * [1]
-    res[id] = -1
+    res[i] = -1
     return res
 
 
