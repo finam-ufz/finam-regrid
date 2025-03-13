@@ -38,7 +38,7 @@ dependencies = [
     "numpy>=1.14.5",
     "pyproj>=3.4",
     "esmpy>=8.7",
-    "finam>=1.0.0rc1",  # need dev version for now
+    "finam>=1.0.0",
 ]
 
 [project.urls]
