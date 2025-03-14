@@ -111,7 +111,7 @@ class Regrid(fm.adapters.regrid.ARegridding):
 
         self.regrid(self.in_field, self.out_field, zero_region=self.zero_region)
 
-        return self.output_grid.from_canonical(self.out_field.data)
+        return self.output_grid.from_canonical(self.out_field.data.copy())
 
     def _finalize(self):
         self.regrid.destroy()
