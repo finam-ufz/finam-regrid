@@ -24,10 +24,19 @@ Constants
    :caption: Constants
 
     ExtrapMethod
+    NormType
+    Region
     RegridMethod
     UnmappedAction
 """
-from esmpy.api.constants import ExtrapMethod, RegridMethod, UnmappedAction
+
+from esmpy.api.constants import (
+    ExtrapMethod,
+    NormType,
+    Region,
+    RegridMethod,
+    UnmappedAction,
+)
 
 from .adapter import Regrid
 
@@ -39,4 +48,4 @@ except ModuleNotFoundError:  # pragma: no cover
 
 
 __all__ = ["Regrid"]
-__all__ += ["ExtrapMethod", "RegridMethod", "UnmappedAction"]
+__all__ += ["ExtrapMethod", "RegridMethod", "UnmappedAction", "NormType", "Region"]

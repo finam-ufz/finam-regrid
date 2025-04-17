@@ -10,7 +10,7 @@ stages:
 check:
   stage: test
   before_script:
-    - conda create -n esmf -c conda-forge esmpy
+    - conda create -n esmf -c conda-forge esmpy python=3.12
     - source activate esmf
     - pip3 install black 'pylint>=3' 'isort[colors]<6'
   script:
@@ -22,7 +22,7 @@ check:
 test:
   stage: test
   before_script:
-    - conda create -n esmf -c conda-forge esmpy
+    - conda create -n esmf -c conda-forge esmpy python=3.12
     - source activate esmf
   script:
     - pip3 install .[test]
@@ -37,7 +37,7 @@ test:
 doctest:
   stage: test
   before_script:
-    - conda create -n esmf -c conda-forge esmpy
+    - conda create -n esmf -c conda-forge esmpy python=3.12
     - source activate esmf
   script:
     - pip3 install --editable .[doc]
@@ -49,7 +49,7 @@ doctest:
 benchmark:
   stage: test
   before_script:
-    - conda create -n esmf -c conda-forge esmpy
+    - conda create -n esmf -c conda-forge esmpy python=3.12
     - source activate esmf
   script:
     - pip3 install --editable .[test]
@@ -73,7 +73,7 @@ build:
 documentation:
   stage: docs
   before_script:
-    - conda create -n esmf -c conda-forge esmpy
+    - conda create -n esmf -c conda-forge esmpy python=3.12
     - source activate esmf
   script:
     - pip3 install --editable .[doc]

@@ -93,3 +93,7 @@ class TestTools(unittest.TestCase):
         regrid(f1, f2)
 
         self.assertTrue(all(f == 2 for f in f2))
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -25,7 +25,7 @@ class TestAdapter(unittest.TestCase):
         if masked:
             in_data = np.ma.masked_where(in_data > 0, in_data)
 
-        self.source = fm.modules.CallbackGenerator(
+        self.source = fm.components.CallbackGenerator(
             callbacks={
                 "Output": (
                     lambda t: in_data.copy(),
@@ -36,14 +36,13 @@ class TestAdapter(unittest.TestCase):
             step=timedelta(days=1),
         )
 
-        self.sink = fm.modules.DebugConsumer(
+        self.sink = fm.components.DebugConsumer(
             {"Input": fm.Info(None, grid=out_grid, units=None)},
             start=datetime(2000, 1, 1),
             step=timedelta(days=1),
         )
 
-        self.composition = fm.Composition([self.source, self.sink])
-        self.composition.initialize()
+        self.composition = fm.Composition([self.source, self.sink], log_level="WARN")
 
         (
             self.source.outputs["Output"]
@@ -213,3 +212,7 @@ def _create_mesh():
     grid = fm.UnstructuredGrid(points, cells, types, data_location=fm.Location.CELLS)
 
     return grid
+
+
+if __name__ == "__main__":
+    unittest.main()

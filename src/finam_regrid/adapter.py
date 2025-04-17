@@ -1,4 +1,5 @@
 """ESMF regridding adapters."""
+
 import esmpy
 import finam as fm
 import numpy as np
@@ -55,6 +56,9 @@ class Regrid(fm.adapters.regrid.ARegridding):
         Input grid specification. Will be retrieved from upstream component if not specified.
     out_grid : finam.Grid, optional
         Output grid specification. Will be retrieved from downstream component if not specified.
+    zero_region : Region or None, optional
+        specify which region of the field indices will be zeroed out before
+        adding the values resulting from the interpolation. If None, defaults to Region.TOTAL.
     **regrid_args : Any
         Keyword argument passed to the ESMPy class
         `Regrid <https://earthsystemmodeling.org/esmpy_doc/release/latest/html/regrid.html>`_.
@@ -69,7 +73,7 @@ class Regrid(fm.adapters.regrid.ARegridding):
         Action on unmapped cells. See :class:`.UnmappedAction`. Defaults to :attr:`.UnmappedAction.IGNORE`.
     """
 
-    def __init__(self, in_grid=None, out_grid=None, **regrid_args):
+    def __init__(self, in_grid=None, out_grid=None, zero_region=None, **regrid_args):
         super().__init__(in_grid, out_grid)
         self.regrid_args = regrid_args
         self.regrid = None
@@ -77,16 +81,15 @@ class Regrid(fm.adapters.regrid.ARegridding):
         self.out_grid = None
         self.in_field = None
         self.out_field = None
-
+        self.zero_region = zero_region
+        self.output_mask = fm.Mask.FLEX
         if "unmapped_action" not in self.regrid_args:
             self.regrid_args["unmapped_action"] = esmpy.UnmappedAction.IGNORE
 
     def _update_grid_specs(self):
         transformer = create_transformer(self.input_grid.crs, self.output_grid.crs)
-
-        self.in_grid, self.in_field = to_esmf(self.input_grid, transformer)
-        self.out_grid, self.out_field = to_esmf(self.output_grid)
-
+        self.in_grid, self.in_field = to_esmf(self.input_grid)
+        self.out_grid, self.out_field = to_esmf(self.output_grid, transformer)
         self.regrid = esmpy.Regrid(
             self.in_field,
             self.out_field,
@@ -96,17 +99,19 @@ class Regrid(fm.adapters.regrid.ARegridding):
     def _get_data(self, time, target):
         in_data = self.pull_data(time, target)
 
-        if fm.data.is_masked_array(in_data):
+        if fm.data.has_masked_values(in_data):
             with ErrorLogger(self.logger):
                 msg = "Regridding is currently not implemented for masked data"
                 raise NotImplementedError(msg)
 
-        self.in_field.data[:] = fm.data.strip_time(in_data, self.input_grid).magnitude
-        self.out_field.data[:] = np.nan
+        self.in_field.data[...] = self.input_grid.to_canonical(
+            fm.data.strip_time(in_data, self.input_grid).magnitude
+        )
+        self.out_field.data[...] = np.nan
 
-        self.regrid(self.in_field, self.out_field)
+        self.regrid(self.in_field, self.out_field, zero_region=self.zero_region)
 
-        return self.out_field.data * fm.data.get_units(in_data)
+        return self.output_grid.from_canonical(self.out_field.data.copy())
 
     def _finalize(self):
         self.regrid.destroy()
