@@ -4,7 +4,7 @@ FINAM-regrid provides regridding components for the FINAM model coupling framewo
 
 ## Copyright Notice
 
-Copyright © 2023, the FINAM developers from Helmholtz-Zentrum für Umweltforschung GmbH - UFZ. All rights reserved.
+Copyright © 2021-2025, the FINAM developers from Helmholtz-Zentrum für Umweltforschung GmbH - UFZ. All rights reserved.
 
 ***The code is a property of:***
 

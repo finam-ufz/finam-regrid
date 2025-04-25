@@ -7,6 +7,12 @@ FINAM Regrid
 Regridding adapter for the `FINAM <https://finam.pages.ufz.de/>`_ model coupling framework,
 using `ESMPy <https://earthsystemmodeling.org/esmpy/>`_.
 
+.. image:: _static/logo.svg
+   :width: 200px
+   :align: center
+   :class: dark-light p-2
+   :alt: FINAM Regrid Logo
+
 Quickstart
 ----------
 
@@ -71,4 +77,4 @@ Further information about licensing, the developers team and the changelog of FI
 License
 ^^^^^^^
 
-LGPLv3, Copyright © 2021-2023, the FINAM developers from Helmholtz-Zentrum für Umweltforschung GmbH - UFZ. All rights reserved.
+LGPLv3, Copyright © 2021-2025, the FINAM developers from Helmholtz-Zentrum für Umweltforschung GmbH - UFZ. All rights reserved.
