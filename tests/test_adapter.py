@@ -19,8 +19,10 @@ class TestAdapter(unittest.TestCase):
         in_data = np.zeros(shape=in_info.grid.data_shape, order=in_info.grid.order)
         if len(in_data.shape) == 1:
             in_data.data[0] = 1.0
-        else:
+        elif len(in_data.shape) == 2:
             in_data.data[0, 0] = 1.0
+        else:
+            in_data.data[0, 0, 0] = 1.0
 
         if masked:
             in_data = np.ma.masked_where(in_data > 0, in_data)
