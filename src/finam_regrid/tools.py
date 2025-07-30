@@ -45,6 +45,19 @@ class RegridCRS(Enum):
 
 
 def is_latlon(coordsys):
+    """
+    Check if given CRS is using lat-lon coordinates.
+
+    Parameters
+    ----------
+    coordsys : any
+        CRS specifier
+
+    Returns
+    -------
+    bool
+        Whether the CRS is using lat-lon coordinates.
+    """
     coordsys = crs.CRS(coordsys)
     return coordsys.is_geographic and all(
         ax.unit_name == "degree" for ax in coordsys.axis_info
