@@ -3,7 +3,6 @@
 import esmpy
 import finam as fm
 import numpy as np
-from finam.tools.log_helper import ErrorLogger
 
 from .tools import RegridCRS, create_transformer, is_latlon, to_esmf
 
@@ -15,11 +14,6 @@ class Regrid(fm.adapters.regrid.ARegridding):
     Supports all of ESMPy's  :class:`regridding methods <.RegridMethod>`.
     For parameters passed as ``**regrid_args``, see the ESMPy class
     `Regrid <https://earthsystemmodeling.org/esmpy_doc/release/latest/html/regrid.html>`_
-
-
-    .. warning::
-        Does currently not support masked input data. Raises a ``NotImplementedError`` in that case.
-
 
     Examples
     --------
