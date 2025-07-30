@@ -23,6 +23,7 @@ Constants
    :toctree: generated
    :caption: Constants
 
+    RegridCRS
     ExtrapMethod
     NormType
     Region
@@ -39,6 +40,7 @@ from esmpy.api.constants import (
 )
 
 from .adapter import Regrid
+from .tools import RegridCRS
 
 try:
     from ._version import __version__
@@ -47,5 +49,5 @@ except ModuleNotFoundError:  # pragma: no cover
     __version__ = "0.0.0.dev0"
 
 
-__all__ = ["Regrid"]
+__all__ = ["Regrid", "RegridCRS"]
 __all__ += ["ExtrapMethod", "RegridMethod", "UnmappedAction", "NormType", "Region"]

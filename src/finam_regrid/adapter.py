@@ -5,7 +5,7 @@ import finam as fm
 import numpy as np
 from finam.tools.log_helper import ErrorLogger
 
-from .tools import create_transformer, to_esmf
+from .tools import RegridCRS, create_transformer, is_latlon, to_esmf
 
 
 class Regrid(fm.adapters.regrid.ARegridding):
@@ -59,6 +59,12 @@ class Regrid(fm.adapters.regrid.ARegridding):
     zero_region : Region or None, optional
         specify which region of the field indices will be zeroed out before
         adding the values resulting from the interpolation. If None, defaults to Region.TOTAL.
+    regrid_crs : RegridCRS or None, optional
+        specify which CRS should be used in the regridder.
+        Options: (i) RegridCRS.SRC (source grid, default), (ii) RegridCRS.DST (target grid),
+        (iii) RegridCRS.SPH (covert both grids to WGS84 and assume it if not present) and
+        (iv) a valid CRS specifier for pyproj.
+        Using RegridCRS.SPH will use spherical coordinates in the ESMF regridder.
     **regrid_args : Any
         Keyword argument passed to the ESMPy class
         `Regrid <https://earthsystemmodeling.org/esmpy_doc/release/latest/html/regrid.html>`_.
@@ -73,7 +79,14 @@ class Regrid(fm.adapters.regrid.ARegridding):
         Action on unmapped cells. See :class:`.UnmappedAction`. Defaults to :attr:`.UnmappedAction.IGNORE`.
     """
 
-    def __init__(self, in_grid=None, out_grid=None, zero_region=None, **regrid_args):
+    def __init__(
+        self,
+        in_grid=None,
+        out_grid=None,
+        zero_region=None,
+        regrid_crs=None,
+        **regrid_args,
+    ):
         super().__init__(in_grid, out_grid)
         self.regrid_args = regrid_args
         self.regrid = None
@@ -83,13 +96,31 @@ class Regrid(fm.adapters.regrid.ARegridding):
         self.out_field = None
         self.zero_region = zero_region
         self.output_mask = fm.Mask.FLEX
+        self.regrid_crs = regrid_crs if regrid_crs is not None else RegridCRS.SRC
         if "unmapped_action" not in self.regrid_args:
             self.regrid_args["unmapped_action"] = esmpy.UnmappedAction.IGNORE
 
     def _update_grid_specs(self):
-        transformer = create_transformer(self.input_grid.crs, self.output_grid.crs)
-        self.in_grid, self.in_field = to_esmf(self.input_grid)
-        self.out_grid, self.out_field = to_esmf(self.output_grid, transformer)
+        assume_target_crs = False
+        if self.regrid_crs == RegridCRS.SRC:
+            target_crs = self.input_grid.crs
+        elif self.regrid_crs == RegridCRS.DST:
+            target_crs = self.output_grid.crs
+        elif self.regrid_crs == RegridCRS.SPH:
+            target_crs = "WGS84"
+            # for spherical we just assume missing crs info as lat-lon
+            assume_target_crs = True
+        else:
+            target_crs = self.regrid_crs
+        sph = is_latlon(target_crs) if target_crs is not None else False
+        src_transformer = create_transformer(
+            self.input_grid.crs, target_crs, assume_target_crs
+        )
+        dst_transformer = create_transformer(
+            self.output_grid.crs, target_crs, assume_target_crs
+        )
+        self.in_grid, self.in_field = to_esmf(self.input_grid, src_transformer, sph)
+        self.out_grid, self.out_field = to_esmf(self.output_grid, dst_transformer, sph)
         self.regrid = esmpy.Regrid(
             self.in_field,
             self.out_field,

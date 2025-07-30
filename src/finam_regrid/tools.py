@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from enum import Enum
+
 import esmpy
 import finam as fm
 import numpy as np
@@ -31,13 +33,31 @@ ESMF_MESH_LOC = {
 }
 
 
+class RegridCRS(Enum):
+    """Selector for CRS used to regrid on."""
+
+    SRC = 0
+    """CRS of the source grid"""
+    DST = 1
+    """CRS of the target grid"""
+    SPH = 2
+    """Use lat-lon representation for both grids."""
+
+
+def is_latlon(coordsys):
+    coordsys = crs.CRS(coordsys)
+    return coordsys.is_geographic and all(
+        ax.unit_name == "degree" for ax in coordsys.axis_info
+    )
+
+
 def _shp(i, dim=3):
     res = dim * [1]
     res[i] = -1
     return res
 
 
-def create_transformer(in_crs, out_crs):
+def create_transformer(in_crs, out_crs, assume_target_crs=False):
     """Creates a transformer for conversion between different CRS.
 
     Returns
@@ -47,6 +67,8 @@ def create_transformer(in_crs, out_crs):
     """
     in_crs = None if in_crs is None else crs.CRS(in_crs)
     out_crs = None if out_crs is None else crs.CRS(out_crs)
+    # if in_crs is not given, we will assume it to be the same as out_crs
+    in_crs = out_crs if (assume_target_crs and in_crs is None) else in_crs
     transformer = (
         None
         if (in_crs is None and out_crs is None) or in_crs == out_crs
@@ -58,22 +80,22 @@ def create_transformer(in_crs, out_crs):
 def _transform_points(transformer, points):
     if transformer is None:
         return points
-    return np.asarray(list(transformer.itransform(points)))
+    return np.asarray(transformer.transform(*points.T)).T
 
 
-def to_esmf(grid, transformer=None):
+def to_esmf(grid, transformer=None, spherical=False):
     """Converts a FINAM grid specification to the corresponding ESMF type."""
     if isinstance(grid, fm.data.StructuredGrid):
-        return _to_esmf_grid(grid, transformer)
+        return _to_esmf_grid(grid, transformer, spherical)
     if isinstance(grid, fm.UnstructuredPoints):
-        return _to_esmf_points(grid, transformer)
+        return _to_esmf_points(grid, transformer, spherical)
     if isinstance(grid, fm.UnstructuredGrid):
-        return _to_esmf_mesh(grid, transformer)
+        return _to_esmf_mesh(grid, transformer, spherical)
 
     raise ValueError(f"Grid type '{grid.__class__.__name__}' not supported")
 
 
-def _to_esmf_grid(grid: fm.data.StructuredGrid, transformer):
+def _to_esmf_grid(grid: fm.data.StructuredGrid, transformer, spherical):
     dims = np.array([d - 1 for d in grid.dims], dtype=np.int32)
     grid_dim = grid.mesh_dim
     loc = ESMF_STAGGER_LOC[grid_dim][grid.data_location]
@@ -82,7 +104,7 @@ def _to_esmf_grid(grid: fm.data.StructuredGrid, transformer):
     g = esmpy.Grid(
         dims,
         staggerloc=[p_loc, c_loc],
-        coord_sys=esmpy.CoordSys.CART,
+        coord_sys=esmpy.CoordSys.SPH_DEG if spherical else esmpy.CoordSys.CART,
     )
     if transformer is None:
         for i in range(grid.dim):
@@ -106,12 +128,12 @@ def _to_esmf_grid(grid: fm.data.StructuredGrid, transformer):
     return g, field
 
 
-def _to_esmf_mesh(grid: fm.UnstructuredGrid, transformer):
+def _to_esmf_mesh(grid: fm.UnstructuredGrid, transformer, spherical):
     loc = ESMF_MESH_LOC[grid.data_location]
     mesh = esmpy.Mesh(
         parametric_dim=grid.mesh_dim,
         spatial_dim=grid.dim,
-        coord_sys=esmpy.CoordSys.CART,
+        coord_sys=esmpy.CoordSys.SPH_DEG if spherical else esmpy.CoordSys.CART,
     )
     num_node = grid.point_count
     points = _transform_points(transformer, grid.points)
@@ -130,20 +152,24 @@ def _to_esmf_mesh(grid: fm.UnstructuredGrid, transformer):
         raise ValueError("ESMF can't be used to regrid 1D data.")
 
     num_elem = grid.cell_count
+    cell_centers = _transform_points(transformer, grid.cell_centers)
     mesh.add_elements(
         element_count=num_elem,
         element_ids=np.arange(num_elem, dtype=int) + 1,
         element_types=elem_types,
         element_conn=grid.cells_connectivity.astype(float),
-        element_coords=grid.cell_centers.ravel().astype(float),
+        element_coords=cell_centers.ravel().astype(float),
     )
     field = esmpy.Field(mesh, name=grid.name, meshloc=loc)
     field.data[:] = np.nan
     return mesh, field
 
 
-def _to_esmf_points(grid: fm.UnstructuredPoints, transformer):
-    locstream = esmpy.LocStream(grid.point_count, coord_sys=esmpy.CoordSys.CART)
+def _to_esmf_points(grid: fm.UnstructuredPoints, transformer, spherical):
+    locstream = esmpy.LocStream(
+        grid.point_count,
+        coord_sys=esmpy.CoordSys.SPH_DEG if spherical else esmpy.CoordSys.CART,
+    )
 
     points = _transform_points(transformer, grid.points)
 
