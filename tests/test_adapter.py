@@ -4,11 +4,11 @@ from datetime import datetime, timedelta
 import finam as fm
 import numpy as np
 
-from finam_regrid import Regrid, RegridMethod
+from finam_regrid import Regrid, RegridCRS, RegridMethod
 
 
 class TestAdapter(unittest.TestCase):
-    def setup_run(self, in_grid, out_grid, regrid_method, masked=False):
+    def setup_run(self, in_grid, out_grid, masked=False, **options):
         time = datetime(2000, 1, 1)
         in_info = fm.Info(
             time=time,
@@ -48,7 +48,7 @@ class TestAdapter(unittest.TestCase):
 
         (
             self.source.outputs["Output"]
-            >> Regrid(regrid_method=regrid_method)
+            >> Regrid(**options)
             >> self.sink.inputs["Input"]
         )
 
@@ -145,6 +145,38 @@ class TestAdapter(unittest.TestCase):
 
         self.setup_run(
             regrid_method=RegridMethod.BILINEAR,
+            in_grid=fm.UniformGrid(
+                dims=(5, 10),
+                spacing=(2.0, 2.0, 2.0),
+                data_location=fm.Location.POINTS,
+                crs="EPSG:32632",
+            ),
+            out_grid=out_grid,
+        )
+        self.composition.run(end_time=datetime(2000, 1, 2))
+
+        self.assertEqual(self.sink.inputs["Input"].info.grid, out_grid)
+        self.assertAlmostEqual(
+            fm.data.get_magnitude(self.sink.data["Input"])[0, 0, 0], 1.0
+        )
+        self.assertAlmostEqual(
+            fm.data.get_magnitude(self.sink.data["Input"])[0, 0, 1], 0.5
+        )
+        self.assertAlmostEqual(
+            fm.data.get_magnitude(self.sink.data["Input"])[0, 1, 0], 0.5
+        )
+        self.assertAlmostEqual(
+            fm.data.get_magnitude(self.sink.data["Input"])[0, 1, 1], 0.25
+        )
+
+    def test_adapter_grid_sph(self):
+        out_grid = fm.UniformGrid(
+            dims=(9, 19), data_location=fm.Location.POINTS, crs="EPSG:25832"
+        )
+
+        self.setup_run(
+            regrid_method=RegridMethod.BILINEAR,
+            regrid_crs=RegridCRS.SPH,
             in_grid=fm.UniformGrid(
                 dims=(5, 10),
                 spacing=(2.0, 2.0, 2.0),
