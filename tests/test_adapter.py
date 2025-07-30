@@ -26,6 +26,7 @@ class TestAdapter(unittest.TestCase):
 
         if masked:
             in_data = np.ma.masked_where(in_data > 0, in_data)
+            in_info.mask = in_data.mask
 
         self.source = fm.components.CallbackGenerator(
             callbacks={
@@ -83,8 +84,8 @@ class TestAdapter(unittest.TestCase):
             out_grid=fm.UniformGrid(dims=(9, 19), data_location=fm.Location.POINTS),
             masked=True,
         )
-        with self.assertRaises(NotImplementedError):
-            self.composition.run(end_time=datetime(2000, 1, 5))
+        # with self.assertRaises(NotImplementedError):
+        self.composition.run(end_time=datetime(2000, 1, 5))
 
     def test_adapter_grid_linear(self):
         self.setup_run(

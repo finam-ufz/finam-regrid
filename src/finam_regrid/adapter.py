@@ -56,6 +56,12 @@ class Regrid(fm.adapters.regrid.ARegridding):
         Input grid specification. Will be retrieved from upstream component if not specified.
     out_grid : finam.Grid, optional
         Output grid specification. Will be retrieved from downstream component if not specified.
+    out_mask : :any:`Mask` value or valid boolean mask for :any:`MaskedArray` or None, optional
+        masking specification of the regridding output. Options:
+            * :any:`Mask.FLEX`: data will be unmasked
+            * :any:`Mask.NONE`: data will be unmasked and given as plain numpy array
+            * valid boolean mask for MaskedArray
+            * None: will be determined by connected target
     zero_region : Region or None, optional
         specify which region of the field indices will be zeroed out before
         adding the values resulting from the interpolation. If None, defaults to Region.TOTAL.
@@ -83,11 +89,12 @@ class Regrid(fm.adapters.regrid.ARegridding):
         self,
         in_grid=None,
         out_grid=None,
+        out_mask=None,
         zero_region=None,
         regrid_crs=None,
         **regrid_args,
     ):
-        super().__init__(in_grid, out_grid)
+        super().__init__(in_grid, out_grid, out_mask)
         self.regrid_args = regrid_args
         self.regrid = None
         self.in_grid = None
@@ -95,12 +102,23 @@ class Regrid(fm.adapters.regrid.ARegridding):
         self.in_field = None
         self.out_field = None
         self.zero_region = zero_region
-        self.output_mask = fm.Mask.FLEX
+        # self.output_mask = fm.Mask.FLEX
         self.regrid_crs = regrid_crs if regrid_crs is not None else RegridCRS.SRC
         if "unmapped_action" not in self.regrid_args:
             self.regrid_args["unmapped_action"] = esmpy.UnmappedAction.IGNORE
 
     def _update_grid_specs(self):
+        # determine masks for in and output
+        self._check_and_set_out_mask()
+        src_mask = None
+        dst_mask = None
+        if self._need_mask(self.input_mask):
+            src_mask = self.input_grid.to_canonical(self.input_mask).astype(int)
+            self.regrid_args["src_mask_values"] = np.array([1])
+        if self._need_mask(self.output_mask):
+            dst_mask = self.output_grid.to_canonical(self.output_mask).astype(int)
+            self.regrid_args["dst_mask_values"] = np.array([1])
+        # determine regrid crs
         assume_target_crs = False
         if self.regrid_crs == RegridCRS.SRC:
             target_crs = self.input_grid.crs
@@ -112,15 +130,21 @@ class Regrid(fm.adapters.regrid.ARegridding):
             assume_target_crs = True
         else:
             target_crs = self.regrid_crs
-        sph = is_latlon(target_crs) if target_crs is not None else False
+        # create transformer
         src_transformer = create_transformer(
             self.input_grid.crs, target_crs, assume_target_crs
         )
         dst_transformer = create_transformer(
             self.output_grid.crs, target_crs, assume_target_crs
         )
-        self.in_grid, self.in_field = to_esmf(self.input_grid, src_transformer, sph)
-        self.out_grid, self.out_field = to_esmf(self.output_grid, dst_transformer, sph)
+        # create grids and regridder
+        sph = is_latlon(target_crs) if target_crs is not None else False
+        self.in_grid, self.in_field = to_esmf(
+            self.input_grid, src_transformer, sph, src_mask
+        )
+        self.out_grid, self.out_field = to_esmf(
+            self.output_grid, dst_transformer, sph, dst_mask
+        )
         self.regrid = esmpy.Regrid(
             self.in_field,
             self.out_field,
@@ -129,11 +153,7 @@ class Regrid(fm.adapters.regrid.ARegridding):
 
     def _get_data(self, time, target):
         in_data = self.pull_data(time, target)
-
-        if fm.data.has_masked_values(in_data):
-            with ErrorLogger(self.logger):
-                msg = "Regridding is currently not implemented for masked data"
-                raise NotImplementedError(msg)
+        self._check_in_data(in_data)
 
         self.in_field.data[...] = self.input_grid.to_canonical(
             fm.data.strip_time(in_data, self.input_grid).magnitude
@@ -142,7 +162,10 @@ class Regrid(fm.adapters.regrid.ARegridding):
 
         self.regrid(self.in_field, self.out_field, zero_region=self.zero_region)
 
-        return self.output_grid.from_canonical(self.out_field.data.copy())
+        data = self.output_grid.from_canonical(self.out_field.data.copy())
+        if fm.data.tools.mask_specified(self.output_mask):
+            return fm.data.tools.to_masked(data, mask=self.output_mask)
+        return data
 
     def _finalize(self):
         self.regrid.destroy()
