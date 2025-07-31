@@ -103,7 +103,7 @@ class Regrid(fm.adapters.regrid.ARegridding):
         If not specified, defaults to ``2.0``.
     extrap_num_levels: int
         The number of levels to output for the extrapolation methods
-        that fill levels (e.g. :attr:`.ExtrapMethod.CREEP`).
+        that fill levels (e.g. :attr:`.ExtrapMethod.CREEP_FILL`).
         When a method is used that requires this, then an error will be returned if it is not specified.
     pole_method : :class:`.PoleMethod`
         specifies which type of artificial pole to construct on the source Grid for regridding.
