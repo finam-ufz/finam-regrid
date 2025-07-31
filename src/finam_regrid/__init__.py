@@ -29,11 +29,15 @@ Constants
     Region
     RegridMethod
     UnmappedAction
+    LineType
+    PoleMethod
 """
 
 from esmpy.api.constants import (
     ExtrapMethod,
+    LineType,
     NormType,
+    PoleMethod,
     Region,
     RegridMethod,
     UnmappedAction,
@@ -50,4 +54,12 @@ except ModuleNotFoundError:  # pragma: no cover
 
 
 __all__ = ["Regrid", "RegridCRS"]
-__all__ += ["ExtrapMethod", "RegridMethod", "UnmappedAction", "NormType", "Region"]
+__all__ += [
+    "ExtrapMethod",
+    "RegridMethod",
+    "UnmappedAction",
+    "NormType",
+    "Region",
+    "LineType",
+    "PoleMethod",
+]
