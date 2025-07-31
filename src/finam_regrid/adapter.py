@@ -51,17 +51,23 @@ class Regrid(fm.adapters.regrid.ARegridding):
     out_grid : finam.Grid, optional
         Output grid specification. Will be retrieved from downstream component if not specified.
     out_mask : :any:`finam.Mask` value or valid boolean mask for :any:`MaskedArray` or None, optional
-        masking specification of the regridding output. Options:
+        masking specification of the regridding output.
+
+        Options:
             * :any:`finam.Mask.FLEX`: data will be unmasked
             * :any:`finam.Mask.NONE`: data will be unmasked and given as plain numpy array
             * valid boolean mask for MaskedArray
             * None: will be determined by connected target
+
     regrid_crs : :class:`.RegridCRS`, crs or None, optional
-        specify which CRS should be used in the regridder. Options:
+        specify which CRS should be used in the regridder.
+
+        Options:
             * :attr:`.RegridCRS.SRC` source grid (default),
             * :attr:`.RegridCRS.DST` target grid,
             * :attr:`.RegridCRS.SPH` covert both grids to WGS84
             * a valid CRS specifier for pyproj
+
     zero_region : :class:`.Region` or None, optional
         specify which region of the field indices will be zeroed out before
         adding the values resulting from the interpolation. If None, defaults to Region.TOTAL.
