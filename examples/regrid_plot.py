@@ -35,10 +35,10 @@ regrid_points = Regrid(out_grid=unstructured_grid)
 
 comp = fm.Composition([source, plot_orig, plot_unif, plot_unif_2, plot_points, specs])
 
-source.outputs["Noise"] >> plot_orig.inputs["Grid"]
-(source.outputs["Noise"] >> regrid_unif >> plot_unif.inputs["Grid"])
-(source.outputs["Noise"] >> regrid_unif_2 >> plot_unif_2.inputs["Grid"])
-(source.outputs["Noise"] >> regrid_points >> plot_points.inputs["Grid"])
+source["Noise"] >> plot_orig["Grid"]
+source["Noise"] >> regrid_unif >> plot_unif["Grid"]
+source["Noise"] >> regrid_unif_2 >> plot_unif_2["Grid"]
+source["Noise"] >> regrid_points >> plot_points["Grid"]
 
 source["Noise"] >> specs["Orig"]
 regrid_unif >> specs["Unif"]
