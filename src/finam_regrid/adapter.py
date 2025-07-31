@@ -71,7 +71,8 @@ class Regrid(fm.adapters.regrid.ARegridding):
 
     zero_region : :class:`.Region` or None, optional
         specify which region of the field indices will be zeroed out before
-        adding the values resulting from the interpolation. If None, defaults to Region.TOTAL.
+        adding the values resulting from the interpolation.
+        If None, defaults to :attr:`.Region.TOTAL`.
     **regrid_args : Any
         Keyword argument passed to the ESMPy class
         `Regrid <https://earthsystemmodeling.org/esmpy_doc/release/latest/html/regrid.html>`_.
