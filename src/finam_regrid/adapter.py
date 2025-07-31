@@ -22,25 +22,25 @@ class Regrid(fm.adapters.regrid.ARegridding):
 
     .. testcode:: constructor
 
-        import finam_regrid as fmr
+        import finam_regrid as fm_rg
 
-        adapter = fmr.Regrid()
+        adapter = fm_rg.Regrid()
 
     Using a specific regridding method:
 
     .. testcode:: constructor
 
-        adapter = fmr.Regrid(
-            regrid_method=fmr.RegridMethod.CONSERVE_2ND,
+        adapter = fm_rg.Regrid(
+            regrid_method=fm_rg.RegridMethod.CONSERVE_2ND,
         )
 
     Using a specific regridding method and extrapolation:
 
     .. testcode:: constructor
 
-        adapter = fmr.Regrid(
-            regrid_method=fmr.RegridMethod.CONSERVE_2ND,
-            extrap_method=fmr.ExtrapMethod.NEAREST_IDAVG,
+        adapter = fm_rg.Regrid(
+            regrid_method=fm_rg.RegridMethod.CONSERVE_2ND,
+            extrap_method=fm_rg.ExtrapMethod.NEAREST_IDAVG,
         )
 
     Parameters
@@ -50,18 +50,19 @@ class Regrid(fm.adapters.regrid.ARegridding):
         Input grid specification. Will be retrieved from upstream component if not specified.
     out_grid : finam.Grid, optional
         Output grid specification. Will be retrieved from downstream component if not specified.
-    out_mask : :any:`Mask` value or valid boolean mask for :any:`MaskedArray` or None, optional
+    out_mask : :any:`finam.Mask` value or valid boolean mask for :any:`MaskedArray` or None, optional
         masking specification of the regridding output. Options:
-            * :any:`Mask.FLEX`: data will be unmasked
-            * :any:`Mask.NONE`: data will be unmasked and given as plain numpy array
+            * :any:`finam.Mask.FLEX`: data will be unmasked
+            * :any:`finam.Mask.NONE`: data will be unmasked and given as plain numpy array
             * valid boolean mask for MaskedArray
             * None: will be determined by connected target
-    regrid_crs : RegridCRS or None, optional
-        specify which CRS should be used in the regridder.
-        Options: (i) RegridCRS.SRC (source grid, default), (ii) RegridCRS.DST (target grid),
-        (iii) RegridCRS.SPH (covert both grids to WGS84 and assume it if not present) and
-        (iv) a valid CRS specifier for pyproj.
-    zero_region : Region or None, optional
+    regrid_crs : :class:`.RegridCRS`, crs or None, optional
+        specify which CRS should be used in the regridder. Options:
+            * :attr:`.RegridCRS.SRC` source grid (default),
+            * :attr:`.RegridCRS.DST` target grid,
+            * :attr:`.RegridCRS.SPH` covert both grids to WGS84
+            * a valid CRS specifier for pyproj
+    zero_region : :class:`.Region` or None, optional
         specify which region of the field indices will be zeroed out before
         adding the values resulting from the interpolation. If None, defaults to Region.TOTAL.
     **regrid_args : Any
@@ -73,17 +74,17 @@ class Regrid(fm.adapters.regrid.ARegridding):
     Other Parameters
     ----------------
 
-    regrid_method : RegridMethod
+    regrid_method : :class:`.RegridMethod`
         Regridding method. See :class:`.RegridMethod`. Defaults to :attr:`.RegridMethod.BILINEAR`.
-    line_type : LineType
+    line_type : :class:`.LineType`
         select the path of the line that connects two points on the surface of a sphere.
         This in turn controls the path along which distances are calculated
         and the shape of the edges that make up a cell.
         If ``None``, defaults to: :attr:`.LineType.GREAT_CIRCLE` for regridmethod == :attr:`.RegridMethod.CONSERVE`,
         or :attr:`.LineType.CART` for regridmethod != :attr:`.RegridMethod.CONSERVE`.
-    unmapped_action : UnmappedAction
+    unmapped_action : :class:`.UnmappedAction`
         Action on unmapped cells. See :class:`.UnmappedAction`. Defaults to :attr:`.UnmappedAction.IGNORE`.
-    extrap_method : ExtrapMethod
+    extrap_method : :class:`.ExtrapMethod`
         Extrapolation method. See :class:`.ExtrapMethod`. Defaults to ``None``.
     extrap_num_src_pnts: int
         The number of source points to use for the extrapolation methods that use more than one source point
@@ -96,7 +97,7 @@ class Regrid(fm.adapters.regrid.ARegridding):
         The number of levels to output for the extrapolation methods
         that fill levels (e.g. :attr:`.ExtrapMethod.CREEP`).
         When a method is used that requires this, then an error will be returned if it is not specified.
-    pole_method : PoleMethod
+    pole_method : :class:`.PoleMethod`
         specifies which type of artificial pole to construct on the source Grid for regridding.
         If ``None``, defaults to: :attr:`.PoleMethod.NONE` for regridmethod == :attr:`.RegridMethod.CONSERVE`, or
         :attr:`.PoleMethod.ALLAVG` for regridmethod != :attr:`.RegridMethod.CONSERVE`.
