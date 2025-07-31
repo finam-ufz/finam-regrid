@@ -9,11 +9,12 @@ from .tools import RegridCRS, create_transformer, is_latlon, to_esmf
 
 class Regrid(fm.adapters.regrid.ARegridding):
     """
-    FINAM adapter for regridding using `ESMPy <https://earthsystemmodeling.org/esmpy/>`_.
+    FINAM adapter for regridding using ESMPy.
 
-    Supports all of ESMPy's  :class:`regridding methods <.RegridMethod>`.
+    Supports all of `ESMPy's <https://earthsystemmodeling.org/esmpy/>`_
+    :class:`regridding methods <.RegridMethod>`.
     For parameters passed as ``**regrid_args``, see the ESMPy class
-    `Regrid <https://earthsystemmodeling.org/esmpy_doc/release/latest/html/regrid.html>`_
+    `Regrid <https://earthsystemmodeling.org/esmpy_doc/release/latest/html/regrid.html>`_.
 
     Examples
     --------
