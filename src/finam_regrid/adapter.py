@@ -77,9 +77,10 @@ class Regrid(fm.adapters.regrid.ARegridding):
         Regridding method. See :class:`.RegridMethod`. Defaults to :attr:`.RegridMethod.BILINEAR`.
     line_type : LineType
         select the path of the line that connects two points on the surface of a sphere.
-        This in turn controls the path along which distances are calculated and the shape of the edges that make up a cell.
-        If ``None``, defaults to: :attr:`.LineType.GREAT_CIRCLE` for regridmethod == :attr:`.RegridMethod.CONSERVE`, or
-        :attr:`.LineType.CART` for regridmethod != :attr:`.RegridMethod.CONSERVE`.
+        This in turn controls the path along which distances are calculated
+        and the shape of the edges that make up a cell.
+        If ``None``, defaults to: :attr:`.LineType.GREAT_CIRCLE` for regridmethod == :attr:`.RegridMethod.CONSERVE`,
+        or :attr:`.LineType.CART` for regridmethod != :attr:`.RegridMethod.CONSERVE`.
     unmapped_action : UnmappedAction
         Action on unmapped cells. See :class:`.UnmappedAction`. Defaults to :attr:`.UnmappedAction.IGNORE`.
     extrap_method : ExtrapMethod
@@ -92,7 +93,8 @@ class Regrid(fm.adapters.regrid.ARegridding):
         extrapolation method. A higher value reduces the influence of more distant points.
         If not specified, defaults to ``2.0``.
     extrap_num_levels: int
-        The number of levels to output for the extrapolation methods that fill levels (e.g. :attr:`.ExtrapMethod.CREEP`).
+        The number of levels to output for the extrapolation methods
+        that fill levels (e.g. :attr:`.ExtrapMethod.CREEP`).
         When a method is used that requires this, then an error will be returned if it is not specified.
     pole_method : PoleMethod
         specifies which type of artificial pole to construct on the source Grid for regridding.
