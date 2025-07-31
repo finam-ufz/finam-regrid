@@ -56,27 +56,57 @@ class Regrid(fm.adapters.regrid.ARegridding):
             * :any:`Mask.NONE`: data will be unmasked and given as plain numpy array
             * valid boolean mask for MaskedArray
             * None: will be determined by connected target
-    zero_region : Region or None, optional
-        specify which region of the field indices will be zeroed out before
-        adding the values resulting from the interpolation. If None, defaults to Region.TOTAL.
     regrid_crs : RegridCRS or None, optional
         specify which CRS should be used in the regridder.
         Options: (i) RegridCRS.SRC (source grid, default), (ii) RegridCRS.DST (target grid),
         (iii) RegridCRS.SPH (covert both grids to WGS84 and assume it if not present) and
         (iv) a valid CRS specifier for pyproj.
-        Using RegridCRS.SPH will use spherical coordinates in the ESMF regridder.
+    zero_region : Region or None, optional
+        specify which region of the field indices will be zeroed out before
+        adding the values resulting from the interpolation. If None, defaults to Region.TOTAL.
     **regrid_args : Any
         Keyword argument passed to the ESMPy class
         `Regrid <https://earthsystemmodeling.org/esmpy_doc/release/latest/html/regrid.html>`_.
 
-        **Important keyword arguments are:**
+        Important keyword arguments are documented in the "Other Parameters" section.
+
+    Other Parameters
+    ----------------
 
     regrid_method : RegridMethod
         Regridding method. See :class:`.RegridMethod`. Defaults to :attr:`.RegridMethod.BILINEAR`.
-    extrap_method : ExtrapMethod
-        Extrapolation method. See :class:`.ExtrapMethod`. Defaults to ``None``.
+    line_type : LineType
+        select the path of the line that connects two points on the surface of a sphere.
+        This in turn controls the path along which distances are calculated and the shape of the edges that make up a cell.
+        If ``None``, defaults to: :attr:`.LineType.GREAT_CIRCLE` for regridmethod == :attr:`.RegridMethod.CONSERVE`, or
+        :attr:`.LineType.CART` for regridmethod != :attr:`.RegridMethod.CONSERVE`.
     unmapped_action : UnmappedAction
         Action on unmapped cells. See :class:`.UnmappedAction`. Defaults to :attr:`.UnmappedAction.IGNORE`.
+    extrap_method : ExtrapMethod
+        Extrapolation method. See :class:`.ExtrapMethod`. Defaults to ``None``.
+    extrap_num_src_pnts: int
+        The number of source points to use for the extrapolation methods that use more than one source point
+        (e.g. :attr:`.ExtrapMethod.NEAREST_IDAVG`). If not specified, defaults to 8.
+    extrap_dist_exponent: float
+        The exponent to raise the distance to when  calculating weights for the :attr:`.ExtrapMethod.NEAREST_IDAVG`
+        extrapolation method. A higher value reduces the influence of more distant points.
+        If not specified, defaults to ``2.0``.
+    extrap_num_levels: int
+        The number of levels to output for the extrapolation methods that fill levels (e.g. :attr:`.ExtrapMethod.CREEP`).
+        When a method is used that requires this, then an error will be returned if it is not specified.
+    pole_method : PoleMethod
+        specifies which type of artificial pole to construct on the source Grid for regridding.
+        If ``None``, defaults to: :attr:`.PoleMethod.NONE` for regridmethod == :attr:`.RegridMethod.CONSERVE`, or
+        :attr:`.PoleMethod.ALLAVG` for regridmethod != :attr:`.RegridMethod.CONSERVE`.
+    regrid_pole_npoints: int
+        specifies how many points to average over if polemethod == :attr:`.PoleMethod.ALLAVG`.
+    ignore_degenerate: bool
+        Ignore degenerate cells when checking the input Grids or Meshes for errors.
+        If this is set to True, then the regridding proceeds, but degenerate cells will be skipped.
+        If set to False, a degenerate cell produces an error.
+        This currently only applies to :attr:`.RegridMethod.CONSERVE`,
+        other regrid methods currently always skip degenerate cells.
+        If ``None``, defaults to ``False``.
     """
 
     def __init__(
@@ -84,8 +114,8 @@ class Regrid(fm.adapters.regrid.ARegridding):
         in_grid=None,
         out_grid=None,
         out_mask=None,
-        zero_region=None,
         regrid_crs=None,
+        zero_region=None,
         **regrid_args,
     ):
         super().__init__(in_grid, out_grid, out_mask)
@@ -107,11 +137,11 @@ class Regrid(fm.adapters.regrid.ARegridding):
         src_mask = None
         dst_mask = None
         if self._need_mask(self.input_mask):
-            src_mask = self.input_grid.to_canonical(self.input_mask).astype(int)
-            self.regrid_args["src_mask_values"] = np.array([1])
+            src_mask = self.input_grid.to_canonical(self.input_mask).astype(np.int32)
+            self.regrid_args["src_mask_values"] = [1]
         if self._need_mask(self.output_mask):
-            dst_mask = self.output_grid.to_canonical(self.output_mask).astype(int)
-            self.regrid_args["dst_mask_values"] = np.array([1])
+            dst_mask = self.output_grid.to_canonical(self.output_mask).astype(np.int32)
+            self.regrid_args["dst_mask_values"] = [1]
         # determine regrid crs
         assume_target_crs = False
         if self.regrid_crs == RegridCRS.SRC:
