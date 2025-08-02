@@ -100,7 +100,9 @@ def to_esmf(grid, transformer=None, spherical=False, mask=None):
     """Converts a FINAM grid specification to the corresponding ESMF type."""
     if isinstance(grid, fm.data.StructuredGrid):
         return _to_esmf_grid(grid, transformer, spherical, mask)
-    if isinstance(grid, fm.UnstructuredPoints):
+    if isinstance(grid, fm.UnstructuredPoints) or (
+        isinstance(grid, fm.UnstructuredGrid) and np.all(grid.cell_types == 0)
+    ):
         return _to_esmf_points(grid, transformer, spherical, mask)
     if isinstance(grid, fm.UnstructuredGrid):
         return _to_esmf_mesh(grid, transformer, spherical, mask)
