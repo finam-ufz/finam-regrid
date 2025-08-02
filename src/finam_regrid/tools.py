@@ -85,7 +85,7 @@ def create_transformer(in_crs, out_crs, assume_target_crs=False):
     transformer = (
         None
         if (in_crs is None and out_crs is None) or in_crs == out_crs
-        else Transformer.from_crs(in_crs, out_crs)
+        else Transformer.from_crs(in_crs, out_crs, always_xy=True)
     )
     return transformer
 
