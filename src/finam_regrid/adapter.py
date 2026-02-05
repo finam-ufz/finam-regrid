@@ -196,11 +196,8 @@ class Regrid(fm.adapters.regrid.ARegridding):
         self.out_field.data[...] = np.nan
 
         self.regrid(self.in_field, self.out_field, zero_region=self.zero_region)
-
-        data = self.output_grid.from_canonical(self.out_field.data.copy())
-        if fm.data.tools.mask_specified(self.output_mask):
-            return fm.data.tools.to_masked(data, mask=self.output_mask)
-        return data
+        # masking will be applied automatically
+        return self.output_grid.from_canonical(self.out_field.data.copy())
 
     def _finalize(self):
         self.regrid.destroy()
