@@ -18,6 +18,8 @@ check:
     - black --check --diff --color .
     - isort --check --diff --color .
     - pylint src/finam_regrid
+  tags:
+    - ufz-intranet
 
 test:
   stage: test
@@ -33,6 +35,8 @@ test:
       coverage_report:
         coverage_format: cobertura
         path: cov.xml
+  tags:
+    - ufz-intranet
 
 doctest:
   stage: test
@@ -45,6 +49,8 @@ doctest:
     # add a dummy build to generate .rst files before the actual tests
     - sphinx-build -b dummy docs/source docs/build
     - sphinx-build -b doctest docs/source docs/build
+  tags:
+    - ufz-intranet
 
 benchmark:
   stage: test
@@ -57,6 +63,8 @@ benchmark:
   artifacts:
     paths:
       - bench
+  tags:
+    - ufz-intranet
 
 build:
   stage: build
@@ -82,6 +90,8 @@ documentation:
   artifacts:
     paths:
       - public
+  tags:
+    - ufz-intranet
 
 pages:
   stage: deploy

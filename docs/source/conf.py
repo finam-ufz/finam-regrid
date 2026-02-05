@@ -1,4 +1,16 @@
 import datetime
+import enum
+
+
+def skip_enum_signature(app, what, name, obj, options, signature, return_annotation):
+    if isinstance(obj, type) and issubclass(obj, (enum.Enum, int)):
+        return "", None  # suppress signature and return annotation
+    return signature, return_annotation
+
+
+def setup(app):
+    app.connect("autodoc-process-signature", skip_enum_signature)
+
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -23,7 +35,6 @@ extensions = [
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.intersphinx",
     "sphinx.ext.doctest",
-    "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",  # parameters look better than with numpydoc only
     "numpydoc",
 ]
@@ -35,22 +46,19 @@ autoclass_content = "class"
 # for uniqur labels/anchors
 autosectionlabel_prefix_document = True
 # sort class members
-autodoc_member_order = "groupwise"
-# autodoc_member_order = 'bysource'
+autodoc_member_order = "bysource"
 
 # Notes in boxes
 napoleon_use_admonition_for_notes = True
-# Attributes like parameters
-napoleon_use_ivar = True
 # keep "Other Parameters" section
 # https://github.com/sphinx-doc/sphinx/issues/10330
 napoleon_use_param = False
 # this is a nice class-doc layout
-numpydoc_show_class_members = True
+numpydoc_show_class_members = False
 # class members have no separate file, so they are not in a toctree
 numpydoc_class_members_toctree = False
 # maybe switch off with:    :no-inherited-members:
-numpydoc_show_inherited_class_members = True
+numpydoc_show_inherited_class_members = False
 # add refs to types also in parameter lists
 numpydoc_xref_param_type = True
 
