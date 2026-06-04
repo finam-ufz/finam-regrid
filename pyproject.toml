@@ -30,6 +30,9 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering",
     "Topic :: Software Development",
     "Topic :: Utilities",
@@ -38,7 +41,7 @@ dependencies = [
     "numpy>=1.14.5",
     "pyproj>=3.4",
     "esmpy>=8.7",
-    "finam>=1.0.0",
+    "finam>=1.1.0",
 ]
 
 [project.urls]
@@ -92,7 +95,12 @@ packages = ["src/finam_regrid"]
 exclude = "_version.py"
 target-version = [
     "py38",
-    "py39"
+    "py39",
+    "py310",
+    "py311",
+    "py312",
+    "py313",
+    "py314",
 ]
 
 [tool.isort]
