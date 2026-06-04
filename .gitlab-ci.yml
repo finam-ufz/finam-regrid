@@ -10,11 +10,10 @@ stages:
 check:
   stage: test
   before_script:
-    - conda create -n esmf -c conda-forge esmpy python=3.12
+    - conda create -n esmf -c conda-forge esmpy python=3.12 pip black isort pylint
     - source activate esmf
-    - pip3 install black 'pylint>=3' 'isort[colors]<6'
   script:
-    - pip3 install .
+    - pip install .
     - black --check --diff --color .
     - isort --check --diff --color .
     - pylint src/finam_regrid
@@ -24,10 +23,10 @@ check:
 test:
   stage: test
   before_script:
-    - conda create -n esmf -c conda-forge esmpy python=3.12
+    - conda create -n esmf -c conda-forge esmpy python=3.12 pip
     - source activate esmf
   script:
-    - pip3 install .[test]
+    - pip install .[test]
     - python -m pytest --cov finam_regrid --cov-report term-missing --cov-report xml:cov.xml -v tests/
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
@@ -41,10 +40,10 @@ test:
 doctest:
   stage: test
   before_script:
-    - conda create -n esmf -c conda-forge esmpy python=3.12
+    - conda create -n esmf -c conda-forge esmpy python=3.12 pip
     - source activate esmf
   script:
-    - pip3 install --editable .[doc]
+    - pip install --editable .[doc]
     # doctest does not detect tests in code files during the first run.
     # add a dummy build to generate .rst files before the actual tests
     - sphinx-build -b dummy docs/source docs/build
@@ -55,10 +54,10 @@ doctest:
 benchmark:
   stage: test
   before_script:
-    - conda create -n esmf -c conda-forge esmpy python=3.12
+    - conda create -n esmf -c conda-forge esmpy python=3.12 pip
     - source activate esmf
   script:
-    - pip3 install --editable .[test]
+    - pip install --editable .[test]
     - python -m pytest -v benchmarks/ --benchmark-histogram bench/bench  --benchmark-sort name
   artifacts:
     paths:
@@ -81,10 +80,10 @@ build:
 documentation:
   stage: docs
   before_script:
-    - conda create -n esmf -c conda-forge esmpy python=3.12
+    - conda create -n esmf -c conda-forge esmpy python=3.12 pip
     - source activate esmf
   script:
-    - pip3 install --editable .[doc]
+    - pip install --editable .[doc]
     - sphinx-build docs/source docs/build
     - mv docs/build public/
   artifacts:
