@@ -11,6 +11,7 @@ from finam.data.grid_tools import ESMF_TYPE_MAP
 from pyproj import Transformer, crs
 
 ESMF_DIM_NAMES = ["ESMF:X", "ESMF:Y", "ESMF:Z"]
+ESMF_SPH_DIM_NAMES = ["ESMF:Lon", "ESMF:Lat", "ESMF:Radius"]
 
 ESMF_STAGGER_LOC_2D = {
     fm.Location.CELLS: esmpy.StaggerLoc.CENTER,
@@ -201,8 +202,9 @@ def _to_esmf_points(grid: fm.UnstructuredPoints, transformer, spherical, mask):
 
     points = _transform_points(transformer, grid.points)
 
+    dim_names = ESMF_SPH_DIM_NAMES if spherical else ESMF_DIM_NAMES
     for i in range(grid.dim):
-        locstream[ESMF_DIM_NAMES[i]] = points[:, i]
+        locstream[dim_names[i]] = points[:, i]
 
     if mask is not None:
         locstream["ESMF:Mask"] = mask
